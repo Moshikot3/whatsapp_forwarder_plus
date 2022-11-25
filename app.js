@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, List, Buttons } = require('whatsapp-web.js');
 const express = require('express');
 const configfile = require('./config.json');
 const { body, validationResult } = require('express-validator');
@@ -10,7 +10,7 @@ const port = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-
+const database = require("./helpers/db_helper")
 
 function sleep() {
   return new Promise((resolve) => {
@@ -20,6 +20,7 @@ function sleep() {
     console.log(timeInMs)
   });
 }
+
 
 app.use(express.json());
 app.use(express.urlencoded({
@@ -38,7 +39,7 @@ app.get('/', (req, res) => {
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    headless: true,
+    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -93,6 +94,8 @@ io.on('connection', function (socket) {
   });
 });
 
+
+
 // Send message
 app.post('/send-message', [
   body('number').notEmpty(),
@@ -111,6 +114,7 @@ app.post('/send-message', [
     });
   }
 
+
   const number = req.body.number + '@c.us';
   const message = req.body.message;
 
@@ -128,13 +132,15 @@ app.post('/send-message', [
   });
 });
 
+const listen_groups = ["test500","test600"]
+
 client.on('message', async (msg) => {
 
 
   console.log('Message from: ', msg.from, " - ", msg.body);
+  console.log(msg.type);
 
-
-    if(msg.from == configfile.SourceGroup && msg.body != '!מחק'){
+    if(listen_groups.includes(msg.from) || msg.from == configfile.SourceGroup && msg.body != '!מחק'){
 
         console.log(msg.type);
         for (var Group in configfile.ForwarToGroups){
@@ -210,31 +216,68 @@ client.on('message', async (msg) => {
 
         switch (msg.body) {
           case "test":
-          console.log('test')
+          console.log('test');
 
         break;
           case msg.body.match(/^!setadmin/)?.input:
-            let newadminnum = msg.body.split("!setadmin ")[1]
-            console.log("setadmin called for "+newadminnum+"@c.us")
+            let newadminnum = msg.body.split("!setadmin ")[1];
+            console.log("setadmin called for "+newadminnum+"@c.us");
             if(!configfile.Owner.includes(msg.from.split('@c.us')[0])) {
-              await msg.reply("לא יקרה")
+              await msg.reply("לא יקרה");
               break;
             }
             for(var Group in configfile.ForwarToGroups){
             var targetedChat = client.getChatById(configfile.ForwarToGroups[Group]);
             
-            (await targetedChat).promoteParticipants([newadminnum+'@c.us'])
-            await sleep()
+            (await targetedChat).promoteParticipants([newadminnum+'@c.us']);
+            await sleep();
 
             }
+            break;
+            case "!הוסף":
+
+                  //
+                  {
+                    client.getChats().then(chats => {
+                      const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+                      if (groups.length == 0) {
+                        msg.reply('You have no group yet.');
+                      } else {
+                        //let groupsMsg = '*All active groups listed below:*\n\n';
+                        var listgroups = [];
+                        groups.forEach((group, i) => {
+                          listgroups.push({id: group.id._serialized, title: group.name});
+                          //console.log(listgroups);
+                          //let sections = [{title:'Select groups to listen',rows:[{id:'te1st1', title:'GROUP 1'},{id:'testtyutyut1yutyu', title:'GROUP 2'}]}];
+                          //groupsMsg += `ID: ${group.id._serialized}\nName: ${group.name}\n\n`;
+                        });
+                        let sections = [{title:'בחר קבוצה',rows:listgroups}];
+                        let list = new List('יש לבחור להאזנה מהרשימה מטה','פתח רשימה',sections,'הוספת קבוצות האזנה','footer');
+                             client.sendMessage(msg.from, list);   
+                      }
+                    });
+                  }
+
             break;
           default:
             break;
         }
 
+        if(msg.type == 'list_response'){
+
+          console.log("receieved response from list.");
+          //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
+          listen_groups += msg.selectedRowId
+          await database.insert("Listeners", { group_id: msg.selectedRowId }, { status: "Listening" });
+      }
 
       if (msg.body == '!ping') {
-        msg.reply('pong')
+        let chat = await msg.getChat();
+
+        let chatid = "testid"
+        await database.insert("Listeners", { group_id: chat }, { location: 'location' });
+        msg.reply('pong');
+          
         } else if (msg.body == '!groupids') {
         client.getChats().then(chats => {
           const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
@@ -251,6 +294,8 @@ client.on('message', async (msg) => {
       }
 
   });
+
+
 
 
 server.listen(port, function () {
