@@ -1,4 +1,4 @@
-const execute = async (client, msg) => {
+const execute = async (sourceGroup, targetGroups, client, msg) => {
 
         client.getChats().then(async chats => {
           const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);

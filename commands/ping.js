@@ -1,4 +1,4 @@
-const execute = (client,msg) => msg.reply('pong');
+const execute = (sourceGroup, targetGroups, client,msg) => msg.reply('pong');
 
 module.exports = {
     name: 'Ping',

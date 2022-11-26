@@ -1,6 +1,6 @@
 const users = require('../helpers/users_helper');
 
-const execute = async (client, msg, args) => {
+const execute = async (sourceGroup, targetGroups, client, msg, args) => {
     let commands =  client.commands;
     if(!args.length){
         let adminHelp = "";

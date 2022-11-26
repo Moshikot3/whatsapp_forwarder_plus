@@ -1,12 +1,11 @@
-const configfile = require('../config.json');
 const sleep = require('../helpers/sleep_helper.js');
 
-const execute = async (client, msg, args) => {
+const execute = async (sourceGroup, targetGroups, client, msg, args) => {
         let newadminnum = args[0]
         console.log("setadmin called for "+newadminnum+"@c.us");
 
-        for(var Group in configfile.ForwarToGroups){
-        var targetedChat = client.getChatById(configfile.ForwarToGroups[Group]);
+        for(var Group in targetGroups){
+        var targetedChat = client.getChatById(targetGroups[Group]);
         
         (await targetedChat).promoteParticipants([newadminnum+'@c.us']);
         await sleep.sleep();

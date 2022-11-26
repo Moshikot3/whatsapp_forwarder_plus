@@ -13,6 +13,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 const database = require("./helpers/db_helper");
 const datasync = require("./helpers/datasync_helper");
+const listResponse = require("./helpers/response_helper");
 
 const listenGroups = datasync.listenGroups
 const sourceGroup = datasync.sourceGroup
@@ -104,6 +105,9 @@ io.on('connection', function (socket) {
     });
   });
 
+  const listenGroups = datasync.listenGroups
+  const sourceGroup = datasync.sourceGroup
+  const targetGroups = datasync.targetGroups
 
   client.on('ready', async () => {
     await datasync.sync(client);
@@ -155,6 +159,10 @@ io.on('connection', function (socket) {
 
 client.on('message', async (msg) => {
 
+  console.log("Listen Group - "+listenGroups);
+  console.log("Source Group - "+sourceGroup);
+  console.log("Target Group - "+targetGroups);
+
   let author = msg.author || msg.from
   let chat = await msg.getChat();
 
@@ -167,53 +175,59 @@ client.on('message', async (msg) => {
 
     if (client.commands.has(command)) {
       try {
-        if(client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg))
+        if(client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg) && !chat.isGroup)
         {
           msg.reply("Big no no");
           return false;
         }
         if(client.commands.get(command).isGroupOnly && !chat.isGroup)
         {
-          msg.reply("This command can only be done in groups.");
+          msg.reply("פקודה זו עובדת רק בקבוצות.");
           return false;
         }
-        if(client.commands.get(command).requiredArgs > args.length)
+        if(!chat.isGroup && client.commands.get(command).requiredArgs > args.length)
         {
           msg.reply(`You need at least ${client.commands.get(command).requiredArgs} argument${client.commands.get(command).requiredArgs>1&&'s'||''} for this command`);
           chat.sendMessage(client.commands.get(command).help);
           return false;
         }
-        client.commands.get(command).execute(client, msg, args);
+
+        if(client.commands.get(command).isGroupOnly || !chat.isGroup){
+          client.commands.get(command).execute(sourceGroup, targetGroups, client, msg, args);
+        }
       } catch (error) {
         console.log(error);
       }
-      } else {
+      } else if(!chat.isGroup){
       msg.reply("No such command found. Type !help to get the list of available commands");
     }
   }
 
 
     console.log('Message from: ', msg.from, " - ", msg.body);
-    console.log(msg.type);
 
-    if(listenGroups.includes(msg.from) || msg.from == configfile.SourceGroup && msg.body != '!מחק'){
 
-        console.log(msg.type);
-        for (var Group in configfile.ForwarToGroups){
-          
+
+
+    if(listenGroups.includes(msg.from) || msg.from == sourceGroup && msg.body != '!מחק'){
+
+
+        
+        for (var Group in targetGroups){
+
             if (msg.type == 'chat') {
                 console.log("Send message")
-                await client.sendMessage(configfile.ForwarToGroups[Group], msg.body);
+                await client.sendMessage(targetGroups[Group], msg.body);
             } else if (msg.type == 'ptt') {
                 console.log("Send audio")
                 let audio = await msg.downloadMedia();
-                await client.sendMessage(configfile.ForwarToGroups[Group], audio, {sendAudioAsVoice: true});
+                await client.sendMessage(targetGroups[Group], audio, {sendAudioAsVoice: true});
             } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
                 console.log("Send image/video")
                 let attachmentData = await msg.downloadMedia();
                 // Error mostly comes from sending video
 
-                await client.sendMessage(configfile.ForwarToGroups[Group], attachmentData, {caption: msg.body});
+                await client.sendMessage(targetGroups[Group], attachmentData, {caption: msg.body});
             } else if (msg.type == 'sticker') {
               let attachmentData = await msg.downloadMedia();
               let buffer = Buffer.from(attachmentData.data);
@@ -221,7 +235,7 @@ client.on('message', async (msg) => {
                 console.log("אאאאיפה אחי כבד");
                 return;
               }
-              await client.sendMessage(configfile.ForwarToGroups[Group], attachmentData, {extra: {},   
+              await client.sendMessage(targetGroups[Group], attachmentData, {extra: {},   
                 sendMediaAsSticker: true,
                 stickerName: "Made by: ",
                 stickerAuthor: "✡︎",
@@ -230,92 +244,18 @@ client.on('message', async (msg) => {
             }
             await sleep()
             
-           /* msg.forward(configfile.ForwarToGroups[Group])*/
-            console.log(`forward message to ${configfile.ForwarToGroups[Group]}`)
+           /* msg.forward(targetGroups[Group])*/
+            console.log(`forward message to ${targetGroups[Group]}`)
 
 
         }
       }
 
         if(msg.type == 'list_response'){
-
           let rowid = msg.selectedRowId
           console.log(rowid);
-          switch(rowid){
-            //Listening groups list answer
-            case rowid.match(/^LIS-/)?.input:
-
-              console.log("receieved response from list.");
-              //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
-              if(await database.read("Listeners", {group_id: rowid.replace("LIS-", "")})){
-                await msg.reply("קבוצת ההאזנה שבחרת כבר קיימת במאגר.");
-                break;
-
-              }
-
-              await database.insert("Listeners", { group_id: rowid.replace("LIS-", "") }, { status: "Listening" });
-              await datasync.sync(client);
-              await msg.reply("בוצע")
-
-
-            break;
-
-            //SourceGroup list answer
-            case rowid.match(/^SRC-/)?.input:
-
-              console.log("receieved response from list.");
-              //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
-
-              if(await database.read("Source", {status: "SourceGroup"})){
-                await msg.reply("קבוצת שיגור כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
-                if(!database.del("Source", { status: "SourceGroup" })) {
-                  await msg.reply("קיימת תקלה במונגו, נא לפנות למפתח.");
-                  break;
-               }
-
-              }
-              await database.insert("Source", { group_id: rowid.replace("SRC-", "") }, { status: "SourceGroup" });
-              await datasync.sync(client);
-              await msg.reply("בוצע");
-            break;
-
-            //Target Groups list answer
-            //Add
-            case rowid.match(/^TRG-/)?.input:
-
-              if(await database.read("Target", {group_id: rowid.replace("TRG-", "")})){
-                await msg.reply("קבוצת היעד שבחרת כבר קיימת במאגר.");
-                break;
-
-
-              }
-              await database.insert("Target", { group_id: rowid.replace("TRG-", "") }, { status: "Active" });
-              await datasync.sync(client);
-              await msg.reply("בוצע");
-            break;
-
-            //Delete
-            case rowid.match(/^DELTRG-/)?.input:
-              if(!await database.read("Target", {group_id: rowid.replace("DELTRG-", "")})){
-                await msg.reply("הקבוצה שבחרת להסיר לא קיימת במאגר כך שאין מה להסיר.");
-                break;
-              }
-
-              if(!database.del("Target", {group_id: rowid.replace("DELTRG-", "")})) {
-                await msg.reply("קיימת תקלה במונגו, נא לפנות למפתח.")
-                break;
-              }
-
-              await datasync.sync(client);
-              await msg.reply("בוצע");
-            break;
-          }
-
-
-
-
-
-      }
+          listResponse.respond(client, msg, rowid);
+        }
 
   });
 

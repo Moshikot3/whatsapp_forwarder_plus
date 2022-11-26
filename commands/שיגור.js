@@ -1,7 +1,7 @@
 const { List } = require('whatsapp-web.js');
 //const datasync = require('../helpers/datasync_helper');
 
-const execute = async (client, msg) => {
+const execute = async (sourceGroup, targetGroups, client, msg) => {
 
   client.getChats().then( async chats => {
     const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);

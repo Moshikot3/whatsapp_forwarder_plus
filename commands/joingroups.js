@@ -1,7 +1,7 @@
 const configfile = require('../config.json');
 const sleep = require('../helpers/sleep_helper');
 
-const execute = async (client, msg) => {
+const execute = async (sourceGroup, targetGroups, client, msg) => {
     if (configfile.Owner.includes(msg.from.split('@c.us')[0])){
           if (chat.isGroup){
             return;
