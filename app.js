@@ -3,7 +3,6 @@ const express = require('express');
 const basicAuth = require('express-basic-auth');
 const rateLimit = require('express-rate-limit')
 const configfile = require('./config.json');
-const { body, validationResult } = require('express-validator');
 const socketIO = require('socket.io');
 const qrcode = require('qrcode');
 const http = require('http');
@@ -236,12 +235,7 @@ client.on('message', async (msg) => {
           await database.insert("Listeners", { group_id: msg.selectedRowId }, { status: "Listening" });
       }
 
-
   });
-
-
-
-
 
 server.listen(port, function () {
   console.log('App running on *: ' + port);
