@@ -1,5 +1,3 @@
-
-const configfile = require('../config.json');
 const { List } = require('whatsapp-web.js');
 
 
@@ -12,23 +10,23 @@ const execute = async (client, msg) => {
           //let groupsMsg = '*All active groups listed below:*\n\n';
           var listgroups = [];
           groups.forEach((group, i) => {
-            listgroups.push({id: 'LIS-'+group.id._serialized, title: group.name});
+            listgroups.push({id: 'DELTRG-'+group.id._serialized, title: group.name});
             //console.log(listgroups);
             //let sections = [{title:'Select groups to listen',rows:[{id:'te1st1', title:'GROUP 1'},{id:'testtyutyut1yutyu', title:'GROUP 2'}]}];
             //groupsMsg += `ID: ${group.id._serialized}\nName: ${group.name}\n\n`;
           });
           let sections = [{title:'בחר קבוצה',rows:listgroups}];
-          let list = new List('יש לבחור להאזנה מהרשימה מטה','פתח רשימה',sections,'הוספת קבוצות האזנה','footer');
+          let list = new List('יש לבחור קבוצת יעד להסרה מהרשימה מטה','פתח רשימה',sections,'הסרת קבוצות יעד','footer');
             await client.sendMessage(msg.from, list);   
         }
     });
 };
 
 module.exports = {
-    name: 'הוסף',
-    description: 'הוספת קבוצה להאזנה',
-    command: '!הוסף',
+    name: 'הסר-יעד',
+    description: 'הסרת קבוצת יעד',
+    command: '!הסר-יעד',
     commandType: 'admin',
     isDependent: false,
-    help: `יש לרשום !הוסף ולבחור קבוצה מהתפריט`,
+    help: `יש לרשום !הסר-יעד ולבחור קבוצה להסרה מהתפריט`,
     execute};

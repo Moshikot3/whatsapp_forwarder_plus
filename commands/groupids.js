@@ -1,6 +1,3 @@
-
-const datasync = require('../helpers/datasync_helper');
-
 const execute = async (client, msg) => {
 
         client.getChats().then(async chats => {
@@ -16,7 +13,6 @@ const execute = async (client, msg) => {
           }
         });
 
-        console.log(datasync.listenGroups+" are the listen groups");
 };
 
 module.exports = {
