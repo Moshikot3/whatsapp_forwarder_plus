@@ -1,4 +1,4 @@
-const { Client, LocalAuth, Buttons } = require('whatsapp-web.js');
+const { Client, LocalAuth, List, Buttons } = require('whatsapp-web.js');
 const express = require('express');
 const basicAuth = require('express-basic-auth');
 const rateLimit = require('express-rate-limit')
@@ -14,17 +14,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 const database = require("./helpers/db_helper")
 
-//Crapbot mitigation
-const fs = require('fs');
-const users = require('./helpers/users_helper');
-//const groups = require('./helpers/groups_helper.js');
-//const msgcount = require('./commands/msgcount');
-const worker = `.wwebjs_auth/session/Default/Service Worker`;
-const listen_groups = ["test500","test600"]
 
-if (fs.existsSync(worker)) {
-  fs.rmSync(worker, { recursive: true });
-}
 
 function sleep() {
   return new Promise((resolve) => {
@@ -57,7 +47,6 @@ app.get('/', async (req, res) => {
   });
 });
 
-
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
@@ -75,19 +64,7 @@ const client = new Client({
   }
 });
 
-client.commands = new Map();
-
-fs.readdir("./commands", (err, files) => {
-  if (err) return console.error(e);
-  files.forEach((commandFile) => {
-    if (commandFile.endsWith(".js")) {
-      let commandName = commandFile.replace(".js", "");
-      const command = require(`./commands/${commandName}`);
-      client.commands.set(commandName, command);
-    }
-  });
-});
-
+client.initialize();
 
 io.on('connection', function (socket) {
   socket.emit('message', 'מתחבר...');
@@ -145,47 +122,50 @@ io.on('connection', function (socket) {
 
 
 
-client.on('message', async (msg) => {
-  let author = msg.author || msg.from
-  let chat = await msg.getChat();
+// Send message
+app.post('/send-message', [
+  body('number').notEmpty(),
+  body('message').notEmpty(),
+], async (req, res) => {
+  const errors = validationResult(req).formatWith(({
+    msg
+  }) => {
+    return msg;
+  });
 
-  if (msg.body.startsWith("!")) {
-
-    let args = msg.body.slice(1).trim().split(/ +/g);
-    let command = args.shift().toLowerCase();
-
-    console.log({ command, args });
-
-    if (client.commands.has(command)) {
-      try {
-        if(client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg))
-        {
-          msg.reply("Big no no");
-          return false;
-        }
-        if(client.commands.get(command).isGroupOnly && !chat.isGroup)
-        {
-          msg.reply("This command can only be done in groups.");
-          return false;
-        }
-        if(client.commands.get(command).requiredArgs > args.length)
-        {
-          msg.reply(`You need at least ${client.commands.get(command).requiredArgs} argument${client.commands.get(command).requiredArgs>1&&'s'||''} for this command`);
-          chat.sendMessage(client.commands.get(command).help);
-          return false;
-        }
-        client.commands.get(command).execute(client, msg, args);
-      } catch (error) {
-        console.log(error);
-      }
-      } else {
-      msg.reply("No such command found. Type !help to get the list of available commands");
-    }
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      status: false,
+      message: errors.mapped()
+    });
   }
 
 
-    console.log('Message from: ', msg.from, " - ", msg.body);
-    console.log(msg.type);
+  const number = req.body.number + '@c.us';
+  const message = req.body.message;
+
+
+  client.sendMessage(number, message).then(response => {
+    res.status(200).json({
+      status: true,
+      response: response
+    });
+  }).catch(err => {
+    res.status(500).json({
+      status: false,
+      response: err
+    });
+  });
+});
+
+const listen_groups = ["test500","test600"]
+
+client.on('message', async (msg) => {
+
+
+
+  console.log('Message from: ', msg.from, " - ", msg.body);
+  console.log(msg.type);
 
     if(listen_groups.includes(msg.from) || msg.from == configfile.SourceGroup && msg.body != '!מחק'){
 
@@ -226,24 +206,125 @@ client.on('message', async (msg) => {
 
 
         }
-      }
+    }else if(msg.from == configfile.SourceGroup && msg.body == '!מחק'){
+
+        for(var Group in configfile.ForwarToGroups){
+
+          let chat = await client.getChatById(configfile.ForwarToGroups[Group]);
+          let [lastMessage] = await chat.fetchMessages({limit: 1});
+          await lastMessage.delete(true);
+          await sleep()
+       }
+
+
+    }
+
+
+      if (msg.body == '!joingroups' && configfile.Owner.includes(msg.from.split('@c.us')[0])){
+        let chat = await msg.getChat();
+          if (chat.isGroup){
+            return;
+          }
+
+        for(var inviteLink in configfile.GroupInvites){
+            try {
+              let inviteCode = configfile.GroupInvites[inviteLink].split('/')[3];
+              console.log(inviteCode)
+              await client.acceptInvite(inviteCode);
+              console.log("Joined Group")
+            } catch (e) {
+              console.log(e)
+              msg.reply(e);
+          }
+
+          await sleep()
+        }}
+      
+
+        switch (msg.body) {
+          case "test":
+          console.log('test');
+
+        break;
+          case msg.body.match(/^!setadmin/)?.input:
+            let newadminnum = msg.body.split("!setadmin ")[1];
+            console.log("setadmin called for "+newadminnum+"@c.us");
+            if(!configfile.Owner.includes(msg.from.split('@c.us')[0])) {
+              await msg.reply("לא יקרה");
+              break;
+            }
+            for(var Group in configfile.ForwarToGroups){
+            var targetedChat = client.getChatById(configfile.ForwarToGroups[Group]);
+            
+            (await targetedChat).promoteParticipants([newadminnum+'@c.us']);
+            await sleep();
+
+            }
+            break;
+            case "!הוסף":
+
+                  //
+                  {
+                    client.getChats().then(chats => {
+                      const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+                      if (groups.length == 0) {
+                        msg.reply('You have no group yet.');
+                      } else {
+                        //let groupsMsg = '*All active groups listed below:*\n\n';
+                        var listgroups = [];
+                        groups.forEach((group, i) => {
+                          listgroups.push({id: group.id._serialized, title: group.name});
+                          //console.log(listgroups);
+                          //let sections = [{title:'Select groups to listen',rows:[{id:'te1st1', title:'GROUP 1'},{id:'testtyutyut1yutyu', title:'GROUP 2'}]}];
+                          //groupsMsg += `ID: ${group.id._serialized}\nName: ${group.name}\n\n`;
+                        });
+                        let sections = [{title:'בחר קבוצה',rows:listgroups}];
+                        let list = new List('יש לבחור להאזנה מהרשימה מטה','פתח רשימה',sections,'הוספת קבוצות האזנה','footer');
+                             client.sendMessage(msg.from, list);   
+                      }
+                    });
+                  }
+
+            break;
+          default:
+            break;
+        }
 
         if(msg.type == 'list_response'){
 
           console.log("receieved response from list.");
           //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
-          listen_groups.push(msg.selectedRowId);
+          listen_groups += msg.selectedRowId
           await database.insert("Listeners", { group_id: msg.selectedRowId }, { status: "Listening" });
       }
 
+      if (msg.body == '!ping') {
+        let chat = await msg.getChat();
+
+        let chatid = "testid"
+        await database.insert("Listeners", { group_id: chat }, { location: 'location' });
+        msg.reply('pong');
+          
+        } else if (msg.body == '!groupids') {
+        client.getChats().then(chats => {
+          const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+          if (groups.length == 0) {
+            msg.reply('You have no group yet.');
+          } else {
+            let groupsMsg = '*All active groups listed below:*\n\n';
+            groups.forEach((group, i) => {
+              groupsMsg += `ID: ${group.id._serialized}\nName: ${group.name}\n\n`;
+            });
+            msg.reply(groupsMsg)
+          }
+        });
+      }
 
   });
 
 
 
 
-
-server.listen(port, function () {
+  server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
-client.initialize();
