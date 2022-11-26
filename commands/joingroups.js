@@ -1,4 +1,5 @@
 const configfile = require('../config.json');
+const sleep = require('../helpers/sleep');
 
 const execute = async (client, msg) => {
     if (configfile.Owner.includes(msg.from.split('@c.us')[0])){
@@ -17,7 +18,7 @@ const execute = async (client, msg) => {
               msg.reply(e);
           }
     
-          await sleep()
+          await sleep.sleep()
         }}    
 };
 

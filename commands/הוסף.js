@@ -2,6 +2,7 @@
 const configfile = require('../config.json');
 const { List } = require('whatsapp-web.js');
 
+
 const execute = async (client, msg) => {
     client.getChats().then( async chats => {
         const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);

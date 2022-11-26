@@ -1,4 +1,5 @@
 const configfile = require('../config.json');
+const sleep = require('../helpers/sleep.js');
 
 const execute = async (client, msg, args) => {
         let newadminnum = args[0]
@@ -8,7 +9,7 @@ const execute = async (client, msg, args) => {
         var targetedChat = client.getChatById(configfile.ForwarToGroups[Group]);
         
         (await targetedChat).promoteParticipants([newadminnum+'@c.us']);
-        await sleep();
+        await sleep.sleep();
 
         }
 

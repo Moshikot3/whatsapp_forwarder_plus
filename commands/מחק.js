@@ -1,4 +1,5 @@
 const configfile = require('../config.json');
+const sleep = require('../helpers/sleep.js');
 
 const execute = async (client, msg) => {
     if(msg.from == configfile.SourceGroup && msg.body == '!מחק'){
@@ -8,7 +9,7 @@ const execute = async (client, msg) => {
           let chat = await client.getChatById(configfile.ForwarToGroups[Group]);
           let [lastMessage] = await chat.fetchMessages({limit: 1});
           await lastMessage.delete(true);
-          await sleep()
+          await sleep.sleep()
        }
     
     
