@@ -11,7 +11,13 @@ const port = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-const database = require("./helpers/db_helper")
+const database = require("./helpers/db_helper");
+const datasync = require("./helpers/datasync_helper");
+
+const listenGroups = datasync.listenGroups
+const sourceGroup = datasync.sourceGroup
+const targetGroups = datasync.targetGroups
+
 
 //Crapbot mitigation
 const fs = require('fs');
@@ -19,7 +25,6 @@ const users = require('./helpers/users_helper');
 //const groups = require('./helpers/groups_helper.js');
 //const msgcount = require('./commands/msgcount');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
-const listen_groups = ["test500","test600"]
 
 if (fs.existsSync(worker)) {
   fs.rmSync(worker, { recursive: true });
@@ -101,6 +106,10 @@ io.on('connection', function (socket) {
 
 
   client.on('ready', async () => {
+    await datasync.sync(client);
+    console.log("Listen Group - "+listenGroups);
+    console.log("Source Group - "+sourceGroup);
+    console.log("Target Group - "+targetGroups);
     socket.emit('ready', 'סטאטוס - זמין');
     socket.emit('message', 'סטאטוס - זמין');
     console.log('client is ready!');
@@ -145,6 +154,7 @@ io.on('connection', function (socket) {
 
 
 client.on('message', async (msg) => {
+
   let author = msg.author || msg.from
   let chat = await msg.getChat();
 
@@ -186,7 +196,7 @@ client.on('message', async (msg) => {
     console.log('Message from: ', msg.from, " - ", msg.body);
     console.log(msg.type);
 
-    if(listen_groups.includes(msg.from) || msg.from == configfile.SourceGroup && msg.body != '!מחק'){
+    if(listenGroups.includes(msg.from) || msg.from == configfile.SourceGroup && msg.body != '!מחק'){
 
         console.log(msg.type);
         for (var Group in configfile.ForwarToGroups){
@@ -229,10 +239,49 @@ client.on('message', async (msg) => {
 
         if(msg.type == 'list_response'){
 
-          console.log("receieved response from list.");
-          //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
-          listen_groups.push(msg.selectedRowId);
-          await database.insert("Listeners", { group_id: msg.selectedRowId }, { status: "Listening" });
+          let rowid = msg.selectedRowId
+          console.log(rowid);
+          switch(rowid){
+            case rowid.match(/^LIS-/)?.input:
+
+
+
+              console.log("receieved response from list.");
+              //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
+              listenGroups.push(msg.selectedRowId);
+              await database.insert("Listeners", { group_id: rowid.replace("LIS-", "") }, { status: "Listening" });
+            break;
+            case rowid.match(/^SRC-/)?.input:
+
+              console.log("receieved response from list.");
+              //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
+
+              if(await database.read("Source", {status: "SourceGroup"})){
+                await msg.reply("קבוצה שיגור כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.")
+                if(!database.del("Source", { status: "SourceGroup" })) {
+                  await msg.reply("קיימת תקלה במונגו, נא לפנות למפתח.")
+                  break;
+            }
+
+              }
+
+              await datasync.sync(client);
+              await database.insert("Source", { group_id: rowid.replace("SRC-", "") }, { status: "SourceGroup" });
+              await msg.reply("בוצע")
+            break;
+            case rowid.match(/^TRG-/)?.input:
+
+              console.log("receieved response from list.");
+              //selgroupName = listgroups.find(group => group.id === msg.selectedRowId)
+              listenGroups.push(msg.selectedRowId);
+              await database.insert("Targets", { group_id: rowid.replace("TRG-", "") }, { status: "Active" });
+            break;
+          }
+
+
+
+
+
       }
 
   });

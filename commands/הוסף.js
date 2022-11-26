@@ -12,7 +12,7 @@ const execute = async (client, msg) => {
           //let groupsMsg = '*All active groups listed below:*\n\n';
           var listgroups = [];
           groups.forEach((group, i) => {
-            listgroups.push({id: group.id._serialized, title: group.name});
+            listgroups.push({id: 'LIS-'+group.id._serialized, title: group.name});
             //console.log(listgroups);
             //let sections = [{title:'Select groups to listen',rows:[{id:'te1st1', title:'GROUP 1'},{id:'testtyutyut1yutyu', title:'GROUP 2'}]}];
             //groupsMsg += `ID: ${group.id._serialized}\nName: ${group.name}\n\n`;

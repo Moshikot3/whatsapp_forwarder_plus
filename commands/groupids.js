@@ -1,5 +1,5 @@
 
-const configfile = require('../config.json');
+const datasync = require('../helpers/datasync_helper');
 
 const execute = async (client, msg) => {
 
@@ -15,6 +15,8 @@ const execute = async (client, msg) => {
             await msg.reply(groupsMsg)
           }
         });
+
+        console.log(datasync.listenGroups+" are the listen groups");
 };
 
 module.exports = {

@@ -1,5 +1,5 @@
 const configfile = require('../config.json');
-const sleep = require('../helpers/sleep.js');
+const sleep = require('../helpers/sleep_helper.js');
 
 const execute = async (client, msg, args) => {
         let newadminnum = args[0]

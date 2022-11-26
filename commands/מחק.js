@@ -1,5 +1,5 @@
 const configfile = require('../config.json');
-const sleep = require('../helpers/sleep.js');
+const sleep = require('../helpers/sleep_helper.js');
 
 const execute = async (client, msg) => {
     if(msg.from == configfile.SourceGroup && msg.body == '!מחק'){
