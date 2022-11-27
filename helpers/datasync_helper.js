@@ -29,7 +29,7 @@ async function sync(client){
             let chatid = chat.id._serialized
             let mongoid = { group_id: chatid }
             let dataListeners = await database.read("Listeners", mongoid);
-            let dataSource = await database.read("Source", { status: "SourceGroup" });
+            let dataSource = await database.read("Source", mongoid);
             let dataTargets = await database.read("Target", mongoid);
             if(!dataListeners && !dataSource && !dataTargets){
                 continue
