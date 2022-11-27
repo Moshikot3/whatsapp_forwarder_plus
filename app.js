@@ -66,7 +66,8 @@ app.get('/', async (req, res) => {
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    headless: false,
+    executablePath: configfile.PathToChrome,
+    headless: true,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
