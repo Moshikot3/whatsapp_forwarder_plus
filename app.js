@@ -27,9 +27,9 @@ const users = require('./helpers/users_helper');
 //const msgcount = require('./commands/msgcount');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
 
-if (fs.existsSync(worker)) {
-  fs.rmSync(worker, { recursive: true });
-}
+// if (fs.existsSync(worker)) {
+//   fs.rmSync(worker, { recursive: true });
+// }
 
 function sleep() {
   return new Promise((resolve) => {
@@ -66,8 +66,8 @@ app.get('/', async (req, res) => {
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    executablePath: configfile.PathToChrome,
-    headless: true,
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -75,7 +75,7 @@ const client = new Client({
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--single-process', // <- this one doesn't works in Windows
+      //'--single-process', // <- this one doesn't works in Windows
       '--disable-gpu'
     ]
   }

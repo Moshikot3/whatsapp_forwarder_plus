@@ -28,7 +28,7 @@
     "mongodb": "^4.12.1",
     "qrcode": "^1.4.4",
     "socket.io": "2.3.0",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#fix-buttons-list"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
