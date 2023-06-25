@@ -19,7 +19,6 @@ const listenGroups = datasync.listenGroups
 const sourceGroup = datasync.sourceGroup
 const targetGroups = datasync.targetGroups
 
-
 //Crapbot mitigation
 const fs = require('fs');
 const users = require('./helpers/users_helper');
@@ -54,19 +53,22 @@ app.use(basicAuth({
   challenge: true // <--- needed to actually show the login dialog!
 }));
 
+
 app.get('/', async (req, res) => {
 
-  
+
+
   res.sendFile('index.html', {
     root: __dirname
   });
 });
 
 
+
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    executablePath: 'C:/Program Files/Google/Chrome/Application/Chrome.exe',
     headless: false,
     args: [
       '--no-sandbox',
@@ -118,6 +120,30 @@ io.on('connection', function (socket) {
     socket.emit('ready', 'סטאטוס - זמין');
     socket.emit('message', 'סטאטוס - זמין');
     console.log('client is ready!');
+
+      client.getChats().then(chats => {
+    const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+    if (groups.length == 0) {
+      console.log("no groups yet");
+    } else {
+      const allgrouplists = [];
+      groups.forEach((group, i) => {
+        const groupData = {
+          id: group.id._serialized,
+          name: group.name
+        };
+        allgrouplists.push(groupData);
+      });
+      console.log(allgrouplists);
+      app.get('/groups', (req, res) => {
+        res.json(allgrouplists);
+      });
+    }
+  });
+
+
+
+
     client.pupPage.on('dialog', async dialog => {
       console.log("Refresh popup just dismissed")
       await dialog.dismiss()});

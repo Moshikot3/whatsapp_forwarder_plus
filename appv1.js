@@ -82,6 +82,14 @@ io.on('connection', function (socket) {
     socket.emit('ready', 'סטאטוס - זמין');
     socket.emit('message', 'סטאטוס - זמין');
     console.log('client is ready!');
+
+
+    
+
+
+
+
+
     client.pupPage.on('dialog', async dialog => {
       console.log("Refresh popup just dismissed")
       await dialog.dismiss()});
