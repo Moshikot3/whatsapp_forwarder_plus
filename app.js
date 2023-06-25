@@ -139,7 +139,10 @@ io.on('connection', function (socket) {
         res.json(allgrouplists);
       });
     }
-  });
+   });
+
+  
+
 
 
 
@@ -286,7 +289,31 @@ client.on('message', async (msg) => {
 
   });
 
+
+
+
+
+app.post('/button-click', async (req, res) => {
+  
+  let selectedGroup = req.body.groupId;
+  console.log('Selected Group ID:', selectedGroup);
+  if(await database.read("Source", {status: "SourceGroup"})){
+    await console.log("קבוצת שיגור כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
+    if(!database.del("Source", { status: "SourceGroup" })) {
+      await console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
+   }
+
+  }
+  await database.insert("Source", { group_id: selectedGroup }, { status: "SourceGroup" });
+  await datasync.sync(client);
+  await console.log("בוצע");
+  console.log(sourceGroup);
+  res.sendStatus(200);
+});
+
 server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
 client.initialize();
+
+

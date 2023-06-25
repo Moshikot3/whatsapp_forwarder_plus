@@ -63,11 +63,33 @@
 		groupSelect.add(option);
 		});
       });
+
+
+	  const srcgbutton = document.getElementById('SrcGrp');
+
+  srcgbutton.addEventListener('click', () => {
+    const selectedGroup = groupSelect.value;
+
+    fetch('/button-click', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ groupId: selectedGroup })
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('Button clicked!');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   });
+});
 </script>
 
 <br><br>
-<button id="globally" type="button">שלח ועדכן</button>
-
+<button id="SrcGrp" type="button">שלח ועדכן</button>
 </body>
 </html>
