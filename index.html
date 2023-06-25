@@ -40,5 +40,34 @@
 			});
 		});
 	</script>
+
+<h1>קבוצת שיגור:</h1>
+
+<select id="groupSelect">
+  <option value="">בחר קבוצת שיגור</option>
+</select>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+    const groupSelect = document.getElementById('groupSelect');
+  
+    // Fetch groups from the server
+    fetch('/groups')
+      .then((response) => response.json())
+      .then((data) => {
+		// Loop through the groups array and create an option element for each group
+		data.forEach((group) => {
+		const option = document.createElement('option');
+		option.value = group.id; // Set the option value to the group ID
+		option.text = group.name; // Set the option text to the group name
+		groupSelect.add(option);
+		});
+      });
+  });
+</script>
+
+<br><br>
+<button id="globally" type="button">שלח ועדכן</button>
+
 </body>
 </html>
