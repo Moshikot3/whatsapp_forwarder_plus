@@ -107,7 +107,6 @@ fs.readdir("./commands", (err, files) => {
 
 io.on('connection', function (socket) {
   socket.emit('message', 'מתחבר...');
-  socket.emit('currentSrcGroup', 'שששששששששששששששששש');
  
 
   client.on('qr', (qr) => {
