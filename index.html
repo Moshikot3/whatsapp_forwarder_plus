@@ -34,6 +34,7 @@
     img {
       max-width: 100%;
       height: auto;
+      margin-bottom: 20px;
     }
 
     #qrcode {
@@ -47,8 +48,8 @@
 
     ul.logs {
       list-style-type: none;
-      margin: 0;
       padding: 0;
+      margin: 0;
       text-align: right;
     }
 
@@ -56,17 +57,15 @@
       margin-bottom: 5px;
     }
 
-    #groupSelect {
-      width: 300px;
-      height: 40px;
+    select {
       font-size: 16px;
+      padding: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      padding: 5px;
       margin-bottom: 10px;
     }
 
-    button#SrcGrp {
+    button {
       font-size: 18px;
       padding: 10px 20px;
       background-color: #4caf50;
@@ -76,8 +75,16 @@
       cursor: pointer;
     }
 
-    button#SrcGrp:hover {
+    button:hover {
       background-color: #45a049;
+    }
+
+    .flex-container {
+      display: flex;
+    }
+
+    .flex-container > div {
+      flex: 1;
     }
   </style>
 </head>
@@ -92,14 +99,29 @@
     <ul class="logs"></ul>
   </div>
 
-  <h1>קבוצת שיגור:</h1>
-  <h3><%= sourceGroupNaming %></h3>
+  <div class="flex-container">
+    <div>
+      <h1>קבוצת שיגור:</h1>
+      <h3><%= sourceGroupNaming %></h3>
 
-  <select id="groupSelect">
-    <option value="">בחר קבוצת שיגור</option>
-  </select>
-  <br><br>
-  <button id="SrcGrp" type="button">שלח ועדכן</button>
+      <select id="groupSelect">
+        <option value="">בחר קבוצת שיגור</option>
+      </select>
+      <br><br>
+      <button id="SrcGrp" type="button">שלח ועדכן</button>
+    </div>
+
+    <div>
+      <h1>קבוצות יעד:</h1>
+      <% if (sourceGroupNaming !== '') { %>
+        <h3><%= sourceGroupNaming %></h3>
+      <% } %>
+
+      <ul id="groupList"></ul>
+      <br><br>
+      <button id="SendBtn" type="button">שלח ועדכן</button>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
@@ -133,6 +155,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const groupSelect = document.getElementById('groupSelect');
+      const groupListContainer = document.getElementById('groupList');
 
       // Fetch groups from the server
       fetch('/groups')
@@ -144,6 +167,24 @@
             option.value = group.id; // Set the option value to the group ID
             option.text = group.name; // Set the option text to the group name
             groupSelect.add(option);
+
+            // Create a list item with checkbox for each group, excluding the sourceGroupNaming
+            if (group.name !== "<%= sourceGroupNaming %>") {
+              const listItem = document.createElement('li');
+
+              const checkbox = document.createElement('input');
+              checkbox.type = 'checkbox';
+              checkbox.id = group.id;
+              checkbox.value = group.id;
+
+              const label = document.createElement('label');
+              label.htmlFor = group.id;
+              label.textContent = group.name;
+
+              listItem.appendChild(checkbox);
+              listItem.appendChild(label);
+              groupListContainer.appendChild(listItem);
+            }
           });
 
           // Set the selected value in the combo box
@@ -176,6 +217,34 @@
             if (response.ok) {
               console.log('Button clicked!');
               location.reload();
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+
+      const sendBtn = document.getElementById('SendBtn');
+      sendBtn.addEventListener('click', () => {
+        // Get the checked groups
+        const checkedGroups = Array.from(groupListContainer.querySelectorAll('input[type="checkbox"]:checked'))
+          .map(checkbox => checkbox.value);
+
+        // Make the API request to send and update the groups
+        fetch('/send-to-group', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              groups: checkedGroups
+            })
+          })
+          .then(response => {
+            if (response.ok) {
+              console.log(checkedGroups);
+              console.log('Button clicked!');
+              
             }
           })
           .catch(error => {

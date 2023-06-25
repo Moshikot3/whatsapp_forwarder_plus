@@ -323,6 +323,29 @@ app.post('/button-click', async (req, res) => {
   res.sendStatus(200);
 });
 
+// Define an endpoint for handling the button click from block 2 - Target Group
+app.post('/send-to-group', async (req, res) => {
+  const groupIds = req.body.groups;
+  // Loop through each group ID
+  if(!database.drop("Target")) {
+    console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
+  }
+  groupIds.forEach(async groupId => {
+
+    if(database.read("Target", {group_id: groupId})){
+     console.log("קבוצת יעד כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
+      if(!database.del("Target", { group_id: groupId })) {
+       console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
+     }
+  
+    }
+     database.insert("Target", { group_id: groupId }, { status: "TargetGroup" });
+     datasync.sync(client);
+    console.log(`Added target group, group ID: ${groupId}`);
+  });
+
+  res.sendStatus(200);
+});
 
 server.listen(port, function () {
   console.log('App running on *: ' + port);

@@ -48,6 +48,21 @@ async function del(collection, id) {
   }
 }
 
+async function drop(collection) {
+  try {
+    var { conn, coll } = await database(collection);
+    await coll.drop();
+    return true;
+  } catch (error) {
+    console.error('Error deleting collection:', error);
+    return false;
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
+
 async function add(colllection, id, addition) {
   try {
     var { conn, coll } = await database(colllection);
@@ -110,5 +125,6 @@ module.exports = {
   del,
   add,
   remove,
+  drop,
   increment
 };
