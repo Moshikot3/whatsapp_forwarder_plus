@@ -1,111 +1,189 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 
-	<head>
-	<meta charset="utf-8" />
-	<title>Whatsapp forwarder lite - חדשות הבזק</title>
-	</head>
+<head>
+  <meta charset="utf-8">
+  <title>Whatsapp forwarder lite - חדשות הבזק</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
 
-	<body>
+    #app {
+      text-align: center;
+      background-color: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-	<div id="app">
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
 
-		<!--<h1>Whatsapp forwarder lite</h1>-->
-		<a><img src="https://tmv.co.il/WAFP.png" alt=""></a>
-		<p>חדשות הבזק - גרסת נסיון</p>
-		<img src="" alt="QR Code יוצג כאשר זמין, במידה והנך מחובר כבר יש להתעלם מהודעה זו." id="qrcode">
-		<h3>Logs:</h3>
-		<ul class="logs"></ul>
-	</div>
+    p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
-	<script>
-		$(document).ready(function () {
-			var socket = io();
+    img {
+      max-width: 100%;
+      height: auto;
+    }
 
-			socket.on('message', function (msg) {
-				$('.logs').append($('<li>').text(msg));
-			});
+    #qrcode {
+      display: none;
+      margin-top: 20px;
+    }
 
-			socket.on('qr', function (src) {
-				$('#qrcode').attr('src', src);
-				$('#qrcode').show();
-			});
+    h3 {
+      margin-bottom: 10px;
+    }
 
-			socket.on('ready', function (data) {
-				$('#qrcode').hide();
-			});
+    ul.logs {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      text-align: right;
+    }
 
-			socket.on('authenticated', function (data) {
-				$('#qrcode').hide();
-			});
-			socket.on('ready', function (data) {
-				$('#qrcode').hide();
-			});
-		});
+    ul.logs li {
+      margin-bottom: 5px;
+    }
 
-	</script>
+    #groupSelect {
+      width: 300px;
+      height: 40px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
 
-	<h1>קבוצת שיגור:</h1><br>
-	<h2>
-		<%= sourceGroupNaming %>
-	</h2>
+    button#SrcGrp {
+      font-size: 18px;
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-	<select id="groupSelect">
-		<option value="">בחר קבוצת שיגור</option>
-	</select>
-	<br><br>
-	<button id="SrcGrp" type="button">שלח ועדכן</button>
-	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-		  const groupSelect = document.getElementById('groupSelect');
-	
-		  // Fetch groups from the server
-		  fetch('/groups')
-			.then((response) => response.json())
-			.then((data) => {
-			  // Loop through the groups array and create an option element for each group
-			  data.forEach((group) => {
-				const option = document.createElement('option');
-				option.value = group.id; // Set the option value to the group ID
-				option.text = group.name; // Set the option text to the group name
-				groupSelect.add(option);
-			  });
-	
-			  // Set the selected value in the combo box
-			  if (sourceGroup) {
-				for (let i = 0; i < groupSelect.options.length; i++) {
-				  if (groupSelect.options[i].value === sourceGroup) {
-					groupSelect.selectedIndex = i;
-					break;
-				  }
-				}
-			  }
-			});
-	
-		  const srcgbutton = document.getElementById('SrcGrp');
-		  srcgbutton.addEventListener('click', () => {
-			const selectedGroup = groupSelect.value;
-			const selectedGroupName = groupSelect.options[groupSelect.selectedIndex].text;
-	
-			fetch('/button-click', {
-			  method: 'POST',
-			  headers: {
-				'Content-Type': 'application/json'
-			  },
-			  body: JSON.stringify({ groupId: selectedGroup, groupName: selectedGroupName })
-			})
-			  .then(response => {
-				if (response.ok) {
-				  console.log('Button clicked!');
-				}
-			  })
-			  .catch(error => {
-				console.error('Error:', error);
-			  });
-		  });
-		});
-	  </script>
-	</body>
-	</html>
+    button#SrcGrp:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!--<h1>Whatsapp forwarder lite</h1>-->
+    <a><img src="https://tmv.co.il/WAFP.png" alt=""></a>
+    <p>גרסת נסיון</p>
+    <img src="" alt="QR Code יוצג כאשר זמין, במידה והנך מחובר כבר יש להתעלם מהודעה זו." id="qrcode">
+    <h3>Logs:</h3>
+    <ul class="logs"></ul>
+  </div>
+
+  <h1>קבוצת שיגור:</h1>
+  <h3><%= sourceGroupNaming %></h3>
+
+  <select id="groupSelect">
+    <option value="">בחר קבוצת שיגור</option>
+  </select>
+  <br><br>
+  <button id="SrcGrp" type="button">שלח ועדכן</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function() {
+      var socket = io();
+
+      socket.on('message', function(msg) {
+        $('.logs').append($('<li>').text(msg));
+      });
+
+      socket.on('qr', function(src) {
+        $('#qrcode').attr('src', src);
+        $('#qrcode').show();
+      });
+
+      socket.on('ready', function(data) {
+        $('#qrcode').hide();
+      });
+
+      socket.on('authenticated', function(data) {
+        $('#qrcode').hide();
+      });
+
+      socket.on('ready', function(data) {
+        $('#qrcode').hide();
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const groupSelect = document.getElementById('groupSelect');
+
+      // Fetch groups from the server
+      fetch('/groups')
+        .then((response) => response.json())
+        .then((data) => {
+          // Loop through the groups array and create an option element for each group
+          data.forEach((group) => {
+            const option = document.createElement('option');
+            option.value = group.id; // Set the option value to the group ID
+            option.text = group.name; // Set the option text to the group name
+            groupSelect.add(option);
+          });
+
+          // Set the selected value in the combo box
+          if (sourceGroup) {
+            for (let i = 0; i < groupSelect.options.length; i++) {
+              if (groupSelect.options[i].value === sourceGroup) {
+                groupSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        });
+
+      const srcgbutton = document.getElementById('SrcGrp');
+      srcgbutton.addEventListener('click', () => {
+        const selectedGroup = groupSelect.value;
+        const selectedGroupName = groupSelect.options[groupSelect.selectedIndex].text;
+
+        fetch('/button-click', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              groupId: selectedGroup,
+              groupName: selectedGroupName
+            })
+          })
+          .then(response => {
+            if (response.ok) {
+              console.log('Button clicked!');
+              location.reload();
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+    });
+  </script>
+</body>
+
+</html>
