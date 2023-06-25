@@ -14,6 +14,7 @@ const io = socketIO(server);
 const database = require("./helpers/db_helper");
 const datasync = require("./helpers/datasync_helper");
 const listResponse = require("./helpers/response_helper");
+const path = require('path');
 
 const listenGroups = datasync.listenGroups
 const sourceGroup = datasync.sourceGroup
@@ -53,14 +54,20 @@ app.use(basicAuth({
   challenge: true // <--- needed to actually show the login dialog!
 }));
 
+app.engine('html', require('ejs').renderFile);
 
 app.get('/', async (req, res) => {
 
+  const SrcGRPID = await database.read("Source", {status: "SourceGroup"});
+  let sourceGroupNaming = SrcGRPID.name
+  console.log(sourceGroup);
 
 
-  res.sendFile('index.html', {
-    root: __dirname
-  });
+    console.log("No sourcegroup or no mongo server");
+ 
+
+
+  res.render(__dirname + "/index.html", {sourceGroupNaming: sourceGroupNaming});
 });
 
 
@@ -99,6 +106,8 @@ fs.readdir("./commands", (err, files) => {
 
 io.on('connection', function (socket) {
   socket.emit('message', 'מתחבר...');
+  socket.emit('currentSrcGroup', 'שששששששששששששששששש');
+ 
 
   client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
@@ -296,6 +305,8 @@ client.on('message', async (msg) => {
 app.post('/button-click', async (req, res) => {
   
   let selectedGroup = req.body.groupId;
+  let selectedGroupName = req.body.groupName;
+  console.log(selectedGroupName);
   console.log('Selected Group ID:', selectedGroup);
   if(await database.read("Source", {status: "SourceGroup"})){
     await console.log("קבוצת שיגור כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
@@ -305,15 +316,20 @@ app.post('/button-click', async (req, res) => {
 
   }
   await database.insert("Source", { group_id: selectedGroup }, { status: "SourceGroup" });
+  await database.insert("Source", { group_id: selectedGroup }, { name: selectedGroupName });
   await datasync.sync(client);
   await console.log("בוצע");
   console.log(sourceGroup);
   res.sendStatus(200);
 });
 
+
 server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
+
+
+
 client.initialize();
 
 

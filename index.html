@@ -1,95 +1,80 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="utf-8" />
-	<title>Whatsapp forwarder lite - חדשות הבזק</title>
+  <meta charset="utf-8" />
+  <title>Whatsapp forwarder lite - חדשות הבזק</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
+  <div id="app">
+    <!--<h1>Whatsapp forwarder lite</h1>-->
+    <a><img src="https://tmv.co.il/WAFP.png" alt=""></a>
+    <p>חדשות הבזק - גרסת נסיון</p>
+    <img src="" alt="QR Code יוצג כאשר זמין, במידה והנך מחובר כבר יש להתעלם מהודעה זו." id="qrcode">
+    <h3>Logs:</h3>
+    <ul class="logs"></ul>
+  </div>
 
-	<div id="app" >
-		
-		<!--<h1>Whatsapp forwarder lite</h1>-->
-		<a><img src="https://tmv.co.il/WAFP.png" alt=""></a>
-		<p>חדשות הבזק - גרסת נסיון</p>
-		<img src="" alt="QR Code יוצג כאשר זמין, במידה והנך מחובר כבר יש להתעלם מהודעה זו." id="qrcode">
-		<h3>Logs:</h3>
-		<ul class="logs"></ul>
-	</div>
+  <h1>קבוצת שיגור:</h1><br>
+  <h2><%= sourceGroupNaming %></h2>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
-	<script>
-		$(document).ready(function() {
-			var socket = io();
+  <select id="groupSelect">
+    <option value="">בחר קבוצת שיגור</option>
+  </select>
+  <br><br>
+  <button id="SrcGrp" type="button">שלח ועדכן</button>
 
-			socket.on('message', function(msg) {
-				$('.logs').append($('<li>').text(msg));
-			});
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const groupSelect = document.getElementById('groupSelect');
 
-			socket.on('qr', function(src) {
-				$('#qrcode').attr('src', src);
-				$('#qrcode').show();
-			});
+      // Fetch groups from the server
+      fetch('/groups')
+        .then((response) => response.json())
+        .then((data) => {
+          // Loop through the groups array and create an option element for each group
+          data.forEach((group) => {
+            const option = document.createElement('option');
+            option.value = group.id; // Set the option value to the group ID
+            option.text = group.name; // Set the option text to the group name
+            groupSelect.add(option);
+          });
 
-			socket.on('ready', function(data) {
-				$('#qrcode').hide();
-			});
+          // Set the selected value in the combo box
+          if (sourceGroup) {
+            for (let i = 0; i < groupSelect.options.length; i++) {
+              if (groupSelect.options[i].value === sourceGroup) {
+                groupSelect.selectedIndex = i;
+                break;
+              }
+            }
+          }
+        });
 
-			socket.on('authenticated', function(data) {
-				$('#qrcode').hide();
-			});
-		});
-	</script>
+      const srcgbutton = document.getElementById('SrcGrp');
+      srcgbutton.addEventListener('click', () => {
+        const selectedGroup = groupSelect.value;
+        const selectedGroupName = groupSelect.options[groupSelect.selectedIndex].text;
 
-<h1>קבוצת שיגור:</h1>
-
-<select id="groupSelect">
-  <option value="">בחר קבוצת שיגור</option>
-</select>
-
-<script>
-	document.addEventListener('DOMContentLoaded', () => {
-    const groupSelect = document.getElementById('groupSelect');
-  
-    // Fetch groups from the server
-    fetch('/groups')
-      .then((response) => response.json())
-      .then((data) => {
-		// Loop through the groups array and create an option element for each group
-		data.forEach((group) => {
-		const option = document.createElement('option');
-		option.value = group.id; // Set the option value to the group ID
-		option.text = group.name; // Set the option text to the group name
-		groupSelect.add(option);
-		});
+        fetch('/button-click', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ groupId: selectedGroup, groupName: selectedGroupName })
+        })
+          .then(response => {
+            if (response.ok) {
+              console.log('Button clicked!');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
       });
-
-
-	  const srcgbutton = document.getElementById('SrcGrp');
-
-  srcgbutton.addEventListener('click', () => {
-    const selectedGroup = groupSelect.value;
-
-    fetch('/button-click', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ groupId: selectedGroup })
-    })
-      .then(response => {
-        if (response.ok) {
-          console.log('Button clicked!');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-  });
-});
-</script>
-
-<br><br>
-<button id="SrcGrp" type="button">שלח ועדכן</button>
+    });
+  </script>
 </body>
 </html>
