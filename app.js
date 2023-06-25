@@ -56,26 +56,27 @@ app.use(basicAuth({
 
 app.engine('html', require('ejs').renderFile);
 
+
+const SrcGRPID = database.read("Source", {status: "SourceGroup"});
+let sourceGroupNaming = SrcGRPID.name
+
 app.get('/', async (req, res) => {
+  let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
 
-  const SrcGRPID = await database.read("Source", {status: "SourceGroup"});
-  let sourceGroupNaming = SrcGRPID.name
-  console.log(sourceGroup);
+  // Check if the database query condition is true
+  const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
+  if (isSourceGroup) {
+    sourceGroupNaming = isSourceGroup.name
+  }
 
-
-    console.log("No sourcegroup or no mongo server");
- 
-
-
-  res.render(__dirname + "/index.html", {sourceGroupNaming: sourceGroupNaming});
+  res.render(__dirname + "/index.html", { sourceGroupNaming });
 });
-
 
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    executablePath: 'C:/Program Files/Google/Chrome/Application/Chrome.exe',
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     headless: false,
     args: [
       '--no-sandbox',
