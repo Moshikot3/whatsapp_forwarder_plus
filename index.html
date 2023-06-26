@@ -121,7 +121,7 @@
     <!--start Block 1-->
     <div>
       <h1>קבוצת שיגור:</h1>
-      <h3><%= sourceGroupNaming %></h3>
+      <p><b> קבוצה נוכחית:</b> <%= sourceGroupNaming %></p>
 
       <select id="groupSelect">
         <option value="">בחר קבוצת שיגור</option>
@@ -262,7 +262,10 @@
           .then(response => {
             if (response.ok) {
               console.log('Button clicked!');
-              location.reload();
+              setTimeout(function () {
+        alert('בוצע רענון נתונים');
+        location.reload(true);
+      }, 1000);
             }
           })
           .catch(error => {
@@ -290,6 +293,10 @@
             if (response.ok) {
               console.log(checkedGroups);
               console.log('Button clicked!');
+              setTimeout(function () {
+        alert('בוצע רענון נתונים');
+        location.reload(true);
+      }, 1000);
               
             }
           })
