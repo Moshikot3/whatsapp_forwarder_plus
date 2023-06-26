@@ -22,12 +22,12 @@
     }
 
     #signatureInput {
-    font-size: 16px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    resize: vertical;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      resize: vertical;
     }
 
     h1 {
@@ -94,13 +94,13 @@
       justify-content: space-between;
     }
 
-    .flex-container > div {
+    .flex-container>div {
       flex-basis: calc(33.33% - 20px);
       margin-bottom: 20px;
     }
 
     @media screen and (max-width: 768px) {
-      .flex-container > div {
+      .flex-container>div {
         flex-basis: 100%;
       }
     }
@@ -121,7 +121,9 @@
     <!--start Block 1-->
     <div>
       <h1>קבוצת שיגור:</h1>
-      <p><b> קבוצה נוכחית:</b> <%= sourceGroupNaming %></p>
+      <p><b> קבוצה נוכחית:</b>
+        <%= sourceGroupNaming %>
+      </p>
 
       <select id="groupSelect">
         <option value="">בחר קבוצת שיגור</option>
@@ -133,21 +135,21 @@
     <!--Start Block 2-->
     <div>
       <h1>קבוצות יעד:</h1>
-      <% if (sourceGroupNaming !== '') { %>
-      <% } %>
+      <% if (sourceGroupNaming !=='' ) { %>
+        <% } %>
 
-      <ul id="groupList"></ul>
-      <br><br>
-      <button id="SendBtn" type="button">שלח ועדכן</button>
+          <ul id="groupList"></ul>
+          <br><br>
+          <button id="SendBtn" type="button">שלח ועדכן</button>
     </div>
     <!--End Block 2-->
     <!--Start Block 3-->
     <div>
       <h1>חתימה:</h1>
 
-      <textarea id="signatureInput" rows="10" placeholder="הכנס חתימה כאן"></textarea>
+      <textarea id="signatureInput" rows="10" placeholder="הכנס חתימה כאן."><%= signature %></textarea>
       <br><br>
-      <button id="SendBtn" type="button">שלח ועדכן</button>
+      <button id="signatureBtn" type="button">שלח ועדכן</button>
     </div>
     <!--End Block 3-->
   </div>
@@ -155,27 +157,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" crossorigin="anonymous"></script>
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       var socket = io();
 
-      socket.on('message', function(msg) {
+      socket.on('message', function (msg) {
         $('.logs').append($('<li>').text(msg));
       });
 
-      socket.on('qr', function(src) {
+      socket.on('qr', function (src) {
         $('#qrcode').attr('src', src);
         $('#qrcode').show();
       });
 
-      socket.on('ready', function(data) {
+      socket.on('ready', function (data) {
         $('#qrcode').hide();
       });
 
-      socket.on('authenticated', function(data) {
+      socket.on('authenticated', function (data) {
         $('#qrcode').hide();
       });
 
-      socket.on('ready', function(data) {
+      socket.on('ready', function (data) {
         $('#qrcode').hide();
       });
     });
@@ -228,21 +230,21 @@
         });
 
 
-        fetch('/all-target-group-ids')
-  .then((response) => response.json())
-  .then((targetGroupIDs) => {
-    // Iterate through the checkboxes and check if the group ID exists in the array
-    const checkboxes = groupListContainer.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach((checkbox) => {
-      const groupID = checkbox.value;
-      if (targetGroupIDs.includes(groupID)) {
-        checkbox.checked = true;
-      }
-    });
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+      fetch('/all-target-group-ids')
+        .then((response) => response.json())
+        .then((targetGroupIDs) => {
+          // Iterate through the checkboxes and check if the group ID exists in the array
+          const checkboxes = groupListContainer.querySelectorAll('input[type="checkbox"]');
+          checkboxes.forEach((checkbox) => {
+            const groupID = checkbox.value;
+            if (targetGroupIDs.includes(groupID)) {
+              checkbox.checked = true;
+            }
+          });
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
 
       const srcgbutton = document.getElementById('SrcGrp');
       srcgbutton.addEventListener('click', () => {
@@ -250,28 +252,60 @@
         const selectedGroupName = groupSelect.options[groupSelect.selectedIndex].text;
 
         fetch('/button-click', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              groupId: selectedGroup,
-              groupName: selectedGroupName
-            })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            groupId: selectedGroup,
+            groupName: selectedGroupName
           })
+        })
           .then(response => {
             if (response.ok) {
               console.log('Button clicked!');
               setTimeout(function () {
-        alert('בוצע רענון נתונים');
-        location.reload(true);
-      }, 1000);
+                alert('בוצע רענון נתונים');
+                location.reload(true);
+              }, 1000);
             }
           })
           .catch(error => {
             console.error('Error:', error);
           });
       });
+
+
+      const signaturetext = document.getElementById('signatureInput');
+      const signbutton = document.getElementById('signatureBtn');
+      signbutton.addEventListener('click', () => {
+        const signature = signaturetext.value;
+        console.log(signature);
+
+        fetch('/signature-click', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            signature: signature,
+
+          })
+        })
+          .then(response => {
+            if (response.ok) {
+              console.log('Button clicked!');
+              setTimeout(function () {
+                alert('בוצע רענון נתונים');
+                location.reload(true);
+              }, 1000);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+
 
       const sendBtn = document.getElementById('SendBtn');
       sendBtn.addEventListener('click', () => {
@@ -281,30 +315,30 @@
 
         // Make the API request to send and update the groups
         fetch('/send-to-group', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              groups: checkedGroups
-            })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            groups: checkedGroups
           })
+        })
           .then(response => {
             if (response.ok) {
               console.log(checkedGroups);
               console.log('Button clicked!');
               setTimeout(function () {
-        alert('בוצע רענון נתונים');
-        location.reload(true);
-      }, 1000);
-              
+                alert('בוצע רענון נתונים');
+                location.reload(true);
+              }, 1000);
+
             }
           })
           .catch(error => {
             console.error('Error:', error);
           });
       });
-    });
+     });
   </script>
 </body>
 

@@ -23,6 +23,7 @@ const targetGroups = datasync.targetGroups
 //Crapbot mitigation
 const fs = require('fs');
 const users = require('./helpers/users_helper');
+const { sign } = require('crypto');
 //const groups = require('./helpers/groups_helper.js');
 //const msgcount = require('./commands/msgcount');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
@@ -60,20 +61,24 @@ app.engine('html', require('ejs').renderFile);
 
 app.get('/', async (req, res) => {
   let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
+  let signature = '' // Initialize signature variable
 
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
-
-  console.log(await database.read("Target"));
+  const isSignature = await database.read("Signature", { status: "Signature" });
 
   if (isSourceGroup) {
     sourceGroupNaming = isSourceGroup.name
   }
 
+  if(isSignature){
+    signature = isSignature.text
+  }
 
 
 
-  res.render(__dirname + "/index.html", { sourceGroupNaming });
+
+  res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
 });
 
 
@@ -85,6 +90,7 @@ app.get('/all-target-group-ids', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
@@ -333,6 +339,11 @@ app.post('/button-click', async (req, res) => {
   res.sendStatus(200);
 });
 
+
+
+
+
+
 // Define an endpoint for handling the button click from block 2 - Target Group
 app.post('/send-to-group', async (req, res) => {
   const groupIds = req.body.groups;
@@ -355,6 +366,28 @@ app.post('/send-to-group', async (req, res) => {
   }
   );
   datasync.sync(client);
+  res.sendStatus(200);
+});
+
+
+
+app.post('/signature-click', async (req, res) => {
+  
+  let signaturetext = req.body.signature;
+  
+  console.log(signaturetext);
+  if(await database.read("Signature", {status: "Signature"})){
+    await console.log("חתימה כבר הוגדרה, מעדכן לחתימה חדשה.");
+    if(!database.del("Signature", { status: "Signature" })) {
+      await console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
+   }
+
+  }
+  await database.insert("Signature", { text: signaturetext }, { status: "Signature" });
+  
+  await datasync.sync(client);
+  await console.log("בוצע");
+  console.log(sourceGroup);
   res.sendStatus(200);
 });
 
