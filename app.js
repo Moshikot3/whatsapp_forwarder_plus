@@ -19,6 +19,7 @@ const path = require('path');
 const listenGroups = datasync.listenGroups
 const sourceGroup = datasync.sourceGroup
 const targetGroups = datasync.targetGroups
+const signaturetxt = datasync.signaturetxt
 
 //Crapbot mitigation
 const fs = require('fs');
@@ -58,55 +59,11 @@ app.use(basicAuth({
 app.engine('html', require('ejs').renderFile);
 
 
-
-app.get('/', async (req, res) => {
-  let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
-  let signature = '' // Initialize signature variable
-
-  // Check if the database query condition is true
-  const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
-  const isSignature = await database.read("Signature", { status: "Signature" });
-
-  if (isSourceGroup) {
-    sourceGroupNaming = isSourceGroup.name
-  }
-
-  if(isSignature){
-    signature = isSignature.text
-  }
-
-
-
-
-  res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
-});
-
-
-app.get('/all-target-group-ids', async (req, res) => {
-  try {
-    const groupIDs = await database.getAllGroupIDs("Target");
-    res.json(groupIDs);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    headless: false,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      //'--single-process', // <- this one doesn't works in Windows
-      '--disable-gpu'
-    ]
+    headless: true
   }
 });
 
@@ -124,8 +81,8 @@ fs.readdir("./commands", (err, files) => {
 });
 
 
-io.on('connection', function (socket) {
-  socket.emit('message', 'מתחבר...');
+io.on('connection',  function (socket) {
+   socket.emit('message', 'מתחבר...');
  
 
   client.on('qr', (qr) => {
@@ -136,46 +93,45 @@ io.on('connection', function (socket) {
     });
   });
 
-  const listenGroups = datasync.listenGroups
-  const sourceGroup = datasync.sourceGroup
-  const targetGroups = datasync.targetGroups
+
 
   client.on('ready', async () => {
     await datasync.sync(client);
+    const listenGroups = datasync.listenGroups
+    const sourceGroup = datasync.sourceGroup
+    const targetGroups = datasync.targetGroups
+    const signaturetxt = datasync.signaturetxt
+
     console.log("Listen Group - "+listenGroups);
     console.log("Source Group - "+sourceGroup);
     console.log("Target Group - "+targetGroups);
+    console.log("Signature - "+signaturetxt);
     socket.emit('ready', 'סטאטוס - זמין');
     socket.emit('message', 'סטאטוס - זמין');
     console.log('client is ready!');
 
-      client.getChats().then(chats => {
-    const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
-    if (groups.length == 0) {
-      console.log("no groups yet");
-    } else {
-      const allgrouplists = [];
-      groups.forEach((group, i) => {
-        const groupData = {
-          id: group.id._serialized,
-          name: group.name
-        };
-        allgrouplists.push(groupData);
-      });
-      console.log(allgrouplists);
-      app.get('/groups', (req, res) => {
-        res.json(allgrouplists);
-      });
-    }
-   });
-
+    await client.getChats().then(chats=> {
+      const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+      if (groups.length == 0) {
+        console.log("no groups yet");
+      } else {
+        const allgrouplists = [];
+        groups.forEach((group, i) => {
+          const groupData = {
+            id: group.id._serialized,
+            name: group.name
+          };
+          allgrouplists.push(groupData);
+        });
+        console.log(allgrouplists);
+        app.get('/groups', (req, res) => {
+          res.json(allgrouplists);
+        });
+      }
+     });
   
 
-
-
-
-
-    client.pupPage.on('dialog', async dialog => {
+     client.pupPage.on('dialog', async dialog => {
       console.log("Refresh popup just dismissed")
       await dialog.dismiss()});
     client.pupPage.on('error', (event) => {
@@ -184,6 +140,7 @@ io.on('connection', function (socket) {
         console.log('Client is ready again!');
     });
   });
+
 
 
   client.on('authenticated', () => {
@@ -275,7 +232,8 @@ client.on('message', async (msg) => {
 
             if (msg.type == 'chat') {
                 console.log("Send message")
-                await client.sendMessage(targetGroups[Group], msg.body);
+                console.log(signaturetxt);
+                await client.sendMessage(targetGroups[Group], msg.body+"\n\n"+signaturetxt);
             } else if (msg.type == 'ptt') {
                 console.log("Send audio")
                 let audio = await msg.downloadMedia();
@@ -285,7 +243,7 @@ client.on('message', async (msg) => {
                 let attachmentData = await msg.downloadMedia();
                 // Error mostly comes from sending video
 
-                await client.sendMessage(targetGroups[Group], attachmentData, {caption: msg.body});
+                await client.sendMessage(targetGroups[Group], attachmentData, {caption: msg.body+"\n\n"+signaturetxt});
             } else if (msg.type == 'sticker') {
               let attachmentData = await msg.downloadMedia();
               let buffer = Buffer.from(attachmentData.data);
@@ -317,6 +275,39 @@ client.on('message', async (msg) => {
 
   });
 
+
+
+  app.get('/', async (req, res) => {
+    let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
+    let signature = '' // Initialize signature variable
+  
+    // Check if the database query condition is true
+    const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
+    const isSignature = await database.read("Signature", { status: "Signature" });
+  
+    if (isSourceGroup) {
+      sourceGroupNaming = isSourceGroup.name
+    }
+  
+    if(isSignature){
+      signature = isSignature.text
+    }
+  
+  
+  
+  
+    res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
+  });
+  
+  
+  app.get('/all-target-group-ids', async (req, res) => {
+    try {
+      const groupIDs = await database.getAllGroupIDs("Target");
+      res.json(groupIDs);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
 app.post('/button-click', async (req, res) => {
   
@@ -394,8 +385,6 @@ app.post('/signature-click', async (req, res) => {
 server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
-
-
 
 client.initialize();
 

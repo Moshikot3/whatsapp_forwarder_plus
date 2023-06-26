@@ -4,10 +4,11 @@ const database = require("./db_helper");
 const listenGroups = [];
 const sourceGroup = [];
 const targetGroups = [];
+const signaturetxt = [];
 
 function empty(array) {
     array.length = 0;
-  }
+}
   
 
 async function sync(client){
@@ -21,8 +22,12 @@ async function sync(client){
     empty(listenGroups)
     empty(sourceGroup)
     empty(targetGroups)
-    
+    empty(signaturetxt)
+
+    let dataSignature = await database.read("Signature", { status: "Signature" });
+
     for(const chat of chats){
+        
 
         if(chat.isGroup && !chat.isReadOnly) {
 
@@ -43,6 +48,7 @@ async function sync(client){
 
                 sourceGroup.push(dataSource.group_id);
             }
+
             if(dataTargets){
 
 
@@ -51,9 +57,16 @@ async function sync(client){
         }
 
     }
+
+    if(dataSignature){
+
+        signaturetxt.push(dataSignature.text);
+        
+    }
+
 console.log("Finish pulling data")
 };
 
 
 module.exports = {
-listenGroups, sourceGroup, targetGroups ,sync};
+listenGroups, sourceGroup, targetGroups, signaturetxt ,sync};

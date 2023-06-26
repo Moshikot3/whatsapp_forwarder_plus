@@ -170,6 +170,10 @@
       });
 
       socket.on('ready', function (data) {
+		setTimeout(function () {
+                alert('נוצר חיבור חדש עם הבוט - מעדכן נתונים');
+                location.reload(true);
+              }, 5000);
         $('#qrcode').hide();
       });
 
