@@ -21,6 +21,15 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
+    #signatureInput {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    resize: vertical;
+    }
+
     h1 {
       font-size: 24px;
       margin-bottom: 10px;
@@ -81,10 +90,19 @@
 
     .flex-container {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
     }
 
     .flex-container > div {
-      flex: 1;
+      flex-basis: calc(33.33% - 20px);
+      margin-bottom: 20px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .flex-container > div {
+        flex-basis: 100%;
+      }
     }
   </style>
 </head>
@@ -100,6 +118,7 @@
   </div>
 
   <div class="flex-container">
+    <!--start Block 1-->
     <div>
       <h1>קבוצת שיגור:</h1>
       <h3><%= sourceGroupNaming %></h3>
@@ -110,7 +129,8 @@
       <br><br>
       <button id="SrcGrp" type="button">שלח ועדכן</button>
     </div>
-
+    <!--stop Block 1-->
+    <!--Start Block 2-->
     <div>
       <h1>קבוצות יעד:</h1>
       <% if (sourceGroupNaming !== '') { %>
@@ -120,6 +140,16 @@
       <br><br>
       <button id="SendBtn" type="button">שלח ועדכן</button>
     </div>
+    <!--End Block 2-->
+    <!--Start Block 3-->
+    <div>
+      <h1>חתימה:</h1>
+
+      <textarea id="signatureInput" rows="10" placeholder="הכנס חתימה כאן"></textarea>
+      <br><br>
+      <button id="SendBtn" type="button">שלח ועדכן</button>
+    </div>
+    <!--End Block 3-->
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
