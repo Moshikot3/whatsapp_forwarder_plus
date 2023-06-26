@@ -63,7 +63,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    headless: true
+    headless: false
   }
 });
 
@@ -81,9 +81,9 @@ fs.readdir("./commands", (err, files) => {
 });
 
 
-io.on('connection',  function (socket) {
-   socket.emit('message', 'מתחבר...');
- 
+io.on('connection', function (socket) {
+  socket.emit('message', 'חדשות הבזק, גרסת בדיקה.');
+
 
   client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
@@ -93,90 +93,82 @@ io.on('connection',  function (socket) {
     });
   });
 
+});
 
+client.on('ready', async () => {
+  await datasync.sync(client);
+  const listenGroups = datasync.listenGroups
+  const sourceGroup = datasync.sourceGroup
+  const targetGroups = datasync.targetGroups
+  const signaturetxt = datasync.signaturetxt
 
-  client.on('ready', async () => {
-    await datasync.sync(client);
-    const listenGroups = datasync.listenGroups
-    const sourceGroup = datasync.sourceGroup
-    const targetGroups = datasync.targetGroups
-    const signaturetxt = datasync.signaturetxt
+  console.log("Listen Group - " + listenGroups);
+  console.log("Source Group - " + sourceGroup);
+  console.log("Target Group - " + targetGroups);
+  console.log("Signature - " + signaturetxt);
+  console.log('client is ready!');
 
-    console.log("Listen Group - "+listenGroups);
-    console.log("Source Group - "+sourceGroup);
-    console.log("Target Group - "+targetGroups);
-    console.log("Signature - "+signaturetxt);
-    socket.emit('ready', 'סטאטוס - זמין');
-    socket.emit('message', 'סטאטוס - זמין');
-    console.log('client is ready!');
-
-    await client.getChats().then(chats=> {
-      const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
-      if (groups.length == 0) {
-        console.log("no groups yet");
-      } else {
-        const allgrouplists = [];
-        groups.forEach((group, i) => {
-          const groupData = {
-            id: group.id._serialized,
-            name: group.name
-          };
-          allgrouplists.push(groupData);
-        });
-        console.log(allgrouplists);
-        app.get('/groups', (req, res) => {
-          res.json(allgrouplists);
-        });
-      }
-     });
-  
-
-     client.pupPage.on('dialog', async dialog => {
-      console.log("Refresh popup just dismissed")
-      await dialog.dismiss()});
-    client.pupPage.on('error', (event) => {
-        client.destroy();
-        client.initialize();
-        console.log('Client is ready again!');
-    });
+  await client.getChats().then(chats => {
+    const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
+    if (groups.length == 0) {
+      console.log("no groups yet");
+    } else {
+      const allgrouplists = [];
+      groups.forEach((group, i) => {
+        const groupData = {
+          id: group.id._serialized,
+          name: group.name
+        };
+        allgrouplists.push(groupData);
+      });
+      console.log(allgrouplists);
+      app.get('/groups', (req, res) => {
+        res.json(allgrouplists);
+      });
+    }
   });
 
 
-
-  client.on('authenticated', () => {
-    socket.emit('authenticated', 'סטאטוס - מאומת');
-    socket.emit('message', 'סטאטוס מאומת');
-    console.log('WAFP Authenticated');
+  client.pupPage.on('dialog', async dialog => {
+    console.log("Refresh popup just dismissed")
+    await dialog.dismiss()
   });
-
-  client.on('auth_failure', function () {
-    socket.emit('message', 'אימות נכשל, מפעיל מחדש.');
-    console.error('Erorr: Authentication failed.');
-  });
-
-  client.on('change_state', state => {
-    console.log('מצב חיבור: ', state);
-  });
-
-  client.on('disconnected', (reason) => {
-    socket.emit('message', 'סטאטוס - מנותק, יש לפנות למנהל המערכת');
-    console.log('Client Disconnected', reason);
+  client.pupPage.on('error', (event) => {
+    client.destroy();
     client.initialize();
-  });
-
-  client.on('message', async (msg) => {
-    socket.emit('message', 'הודעה חדשה מאת: ' + msg.from +" - "+ msg.body);
-
+    console.log('Client is ready again!');
   });
 });
 
 
 
+client.on('authenticated', () => {
+  console.log('WAFP Authenticated');
+});
+
+client.on('auth_failure', function () {
+  console.error('Erorr: Authentication failed.');
+});
+
+client.on('change_state', state => {
+  console.log('מצב חיבור: ', state);
+});
+
+client.on('disconnected', (reason) => {
+  console.log('Client Disconnected', reason);
+  client.initialize();
+});
+
+
+
+
+
+
 client.on('message', async (msg) => {
 
-  console.log("Listen Group - "+listenGroups);
-  console.log("Source Group - "+sourceGroup);
-  console.log("Target Group - "+targetGroups);
+  console.log("Listen Group - " + listenGroups);
+  console.log("Source Group - " + sourceGroup);
+  console.log("Target Group - " + targetGroups);
 
   let author = msg.author || msg.from
   let chat = await msg.getChat();
@@ -190,136 +182,134 @@ client.on('message', async (msg) => {
 
     if (client.commands.has(command)) {
       try {
-        if(client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg) && !chat.isGroup)
-        {
+        if (client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg) && !chat.isGroup) {
           msg.reply("Big no no");
           return false;
         }
-        if(client.commands.get(command).isGroupOnly && !chat.isGroup)
-        {
+        if (client.commands.get(command).isGroupOnly && !chat.isGroup) {
           msg.reply("פקודה זו עובדת רק בקבוצות.");
           return false;
         }
-        if(!chat.isGroup && client.commands.get(command).requiredArgs > args.length)
-        {
-          msg.reply(`You need at least ${client.commands.get(command).requiredArgs} argument${client.commands.get(command).requiredArgs>1&&'s'||''} for this command`);
+        if (!chat.isGroup && client.commands.get(command).requiredArgs > args.length) {
+          msg.reply(`You need at least ${client.commands.get(command).requiredArgs} argument${client.commands.get(command).requiredArgs > 1 && 's' || ''} for this command`);
           chat.sendMessage(client.commands.get(command).help);
           return false;
         }
 
-        if(client.commands.get(command).isGroupOnly || !chat.isGroup){
+        if (client.commands.get(command).isGroupOnly || !chat.isGroup) {
           client.commands.get(command).execute(sourceGroup, targetGroups, client, msg, args);
         }
       } catch (error) {
         console.log(error);
       }
-      } else if(!chat.isGroup){
+    } else if (!chat.isGroup) {
       msg.reply("No such command found. Type !help to get the list of available commands");
     }
   }
 
 
-    console.log('Message from: ', msg.from, " - ", msg.body);
+  console.log('Message from: ', msg.from, " - ", msg.body);
 
 
 
 
-    if(listenGroups.includes(msg.from) || msg.from == sourceGroup && msg.body != '!מחק'){
+  if (listenGroups.includes(msg.from) || msg.from == sourceGroup && msg.body != '!מחק') {
 
 
-        
-        for (var Group in targetGroups){
 
-            if (msg.type == 'chat') {
-                console.log("Send message")
-                console.log(signaturetxt);
-                await client.sendMessage(targetGroups[Group], msg.body+"\n\n"+signaturetxt);
-            } else if (msg.type == 'ptt') {
-                console.log("Send audio")
-                let audio = await msg.downloadMedia();
-                await client.sendMessage(targetGroups[Group], audio, {sendAudioAsVoice: true});
-            } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
-                console.log("Send image/video")
-                let attachmentData = await msg.downloadMedia();
-                // Error mostly comes from sending video
+    for (var Group in targetGroups) {
 
-                await client.sendMessage(targetGroups[Group], attachmentData, {caption: msg.body+"\n\n"+signaturetxt});
-            } else if (msg.type == 'sticker') {
-              let attachmentData = await msg.downloadMedia();
-              let buffer = Buffer.from(attachmentData.data);
-              if(buffer.length / 1e+6 > 5) {
-                console.log("אאאאיפה אחי כבד");
-                return;
-              }
-              await client.sendMessage(targetGroups[Group], attachmentData, {extra: {},   
-                sendMediaAsSticker: true,
-                stickerName: "Made by: ",
-                stickerAuthor: "✡︎",
-              })
+      if (msg.type == 'chat') {
+        console.log("Send message")
+        console.log(signaturetxt);
+        await client.sendMessage(targetGroups[Group], msg.body + "\n\n" + signaturetxt);
+      } else if (msg.type == 'ptt') {
+        console.log("Send audio")
+        let audio = await msg.downloadMedia();
+        await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true });
+      } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
+        console.log("Send image/video")
+        let attachmentData = await msg.downloadMedia();
+        // Error mostly comes from sending video
 
-            }
-            await sleep()
-            
-           /* msg.forward(targetGroups[Group])*/
-            console.log(`forward message to ${targetGroups[Group]}`)
-
-
+        await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + "\n\n" + signaturetxt });
+      } else if (msg.type == 'sticker') {
+        let attachmentData = await msg.downloadMedia();
+        let buffer = Buffer.from(attachmentData.data);
+        if (buffer.length / 1e+6 > 5) {
+          console.log("אאאאיפה אחי כבד");
+          return;
         }
+        await client.sendMessage(targetGroups[Group], attachmentData, {
+          extra: {},
+          sendMediaAsSticker: true,
+          stickerName: "Made by: ",
+          stickerAuthor: "✡︎",
+        })
+
       }
+      await sleep()
 
-        if(msg.type == 'list_response'){
-          let rowid = msg.selectedRowId
-          console.log(rowid);
-          listResponse.respond(client, msg, rowid);
-        }
-
-  });
+      /* msg.forward(targetGroups[Group])*/
+      console.log(`forward message to ${targetGroups[Group]}`)
 
 
-
-  app.get('/', async (req, res) => {
-    let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
-    let signature = '' // Initialize signature variable
-  
-    // Check if the database query condition is true
-    const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
-    const isSignature = await database.read("Signature", { status: "Signature" });
-  
-    if (isSourceGroup) {
-      sourceGroupNaming = isSourceGroup.name
     }
-  
-    if(isSignature){
-      signature = isSignature.text
-    }
-  
-  
-  
-  
-    res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
-  });
-  
-  
-  app.get('/all-target-group-ids', async (req, res) => {
-    try {
-      const groupIDs = await database.getAllGroupIDs("Target");
-      res.json(groupIDs);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
+  }
+
+  if (msg.type == 'list_response') {
+    let rowid = msg.selectedRowId
+    console.log(rowid);
+    listResponse.respond(client, msg, rowid);
+  }
+
+});
+
+
+
+app.get('/', async (req, res) => {
+  let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
+  let signature = '' // Initialize signature variable
+
+  // Check if the database query condition is true
+  const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
+  const isSignature = await database.read("Signature", { status: "Signature" });
+
+  if (isSourceGroup) {
+    sourceGroupNaming = isSourceGroup.name
+  }
+
+  if (isSignature) {
+    signature = isSignature.text
+  }
+
+
+
+
+  res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
+});
+
+
+app.get('/all-target-group-ids', async (req, res) => {
+  try {
+    const groupIDs = await database.getAllGroupIDs("Target");
+    res.json(groupIDs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/button-click', async (req, res) => {
-  
+
   let selectedGroup = req.body.groupId;
   let selectedGroupName = req.body.groupName;
   console.log(selectedGroupName);
   console.log('Selected Group ID:', selectedGroup);
-  if(await database.read("Source", {status: "SourceGroup"})){
+  if (await database.read("Source", { status: "SourceGroup" })) {
     await console.log("קבוצת שיגור כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
-    if(!database.del("Source", { status: "SourceGroup" })) {
+    if (!database.del("Source", { status: "SourceGroup" })) {
       await console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
-   }
+    }
 
   }
   await database.insert("Source", { group_id: selectedGroup }, { status: "SourceGroup" });
@@ -339,20 +329,20 @@ app.post('/button-click', async (req, res) => {
 app.post('/send-to-group', async (req, res) => {
   const groupIds = req.body.groups;
   // Loop through each group ID
-  if(!database.drop("Target")) {
+  if (!database.drop("Target")) {
     console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
   }
   groupIds.forEach(async groupId => {
 
-    if(database.read("Target", {group_id: groupId})){
-     console.log("קבוצת יעד כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
-      if(!database.del("Target", { group_id: groupId })) {
-       console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
-     }
-  
+    if (database.read("Target", { group_id: groupId })) {
+      console.log("קבוצת יעד כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
+      if (!database.del("Target", { group_id: groupId })) {
+        console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
+      }
+
     }
-     database.insert("Target", { group_id: groupId }, { status: "TargetGroup" });
-     
+    database.insert("Target", { group_id: groupId }, { status: "TargetGroup" });
+
     console.log(`Added target group, group ID: ${groupId}`);
   }
   );
@@ -363,19 +353,19 @@ app.post('/send-to-group', async (req, res) => {
 
 
 app.post('/signature-click', async (req, res) => {
-  
+
   let signaturetext = req.body.signature;
-  
+
   console.log(signaturetext);
-  if(await database.read("Signature", {status: "Signature"})){
+  if (await database.read("Signature", { status: "Signature" })) {
     await console.log("חתימה כבר הוגדרה, מעדכן לחתימה חדשה.");
-    if(!database.del("Signature", { status: "Signature" })) {
+    if (!database.del("Signature", { status: "Signature" })) {
       await console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
-   }
+    }
 
   }
   await database.insert("Signature", { text: signaturetext }, { status: "Signature" });
-  
+
   await datasync.sync(client);
   await console.log("בוצע");
   console.log(sourceGroup);
