@@ -100,6 +100,22 @@ async function increment(colllection, id, addition) {
   }
 }
 
+async function getAllGroupIDs(collection) {
+  try {
+    var { conn, coll } = await database(collection);
+    const targetDocuments = await coll.find({ status: 'TargetGroup' }).toArray();
+    const groupIDs = targetDocuments.map(doc => doc.group_id);
+    return groupIDs;
+  } catch (error) {
+    console.error('Error:', error);
+    throw new Error('Failed to retrieve group IDs');
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
+
 
 async function remove(colllection, id, removal) {
   try {
@@ -119,6 +135,8 @@ async function remove(colllection, id, removal) {
   }
 }
 
+
+
 module.exports = {
   insert,
   read,
@@ -126,5 +144,6 @@ module.exports = {
   add,
   remove,
   drop,
-  increment
+  increment,
+  getAllGroupIDs
 };

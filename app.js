@@ -57,26 +57,39 @@ app.use(basicAuth({
 app.engine('html', require('ejs').renderFile);
 
 
-const SrcGRPID = database.read("Source", {status: "SourceGroup"});
-let sourceGroupNaming = SrcGRPID.name
 
 app.get('/', async (req, res) => {
   let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
 
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
+
+  console.log(await database.read("Target"));
+
   if (isSourceGroup) {
     sourceGroupNaming = isSourceGroup.name
   }
+
+
+
 
   res.render(__dirname + "/index.html", { sourceGroupNaming });
 });
 
 
+app.get('/all-target-group-ids', async (req, res) => {
+  try {
+    const groupIDs = await database.getAllGroupIDs("Target");
+    res.json(groupIDs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     headless: false,
     args: [
       '--no-sandbox',
@@ -299,9 +312,6 @@ client.on('message', async (msg) => {
   });
 
 
-
-
-
 app.post('/button-click', async (req, res) => {
   
   let selectedGroup = req.body.groupId;
@@ -340,10 +350,11 @@ app.post('/send-to-group', async (req, res) => {
   
     }
      database.insert("Target", { group_id: groupId }, { status: "TargetGroup" });
-     datasync.sync(client);
+     
     console.log(`Added target group, group ID: ${groupId}`);
-  });
-
+  }
+  );
+  datasync.sync(client);
   res.sendStatus(200);
 });
 
