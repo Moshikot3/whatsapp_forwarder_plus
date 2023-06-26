@@ -114,7 +114,6 @@
     <div>
       <h1>קבוצות יעד:</h1>
       <% if (sourceGroupNaming !== '') { %>
-        <h3><%= sourceGroupNaming %></h3>
       <% } %>
 
       <ul id="groupList"></ul>
@@ -197,6 +196,23 @@
             }
           }
         });
+
+
+        fetch('/all-target-group-ids')
+  .then((response) => response.json())
+  .then((targetGroupIDs) => {
+    // Iterate through the checkboxes and check if the group ID exists in the array
+    const checkboxes = groupListContainer.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      const groupID = checkbox.value;
+      if (targetGroupIDs.includes(groupID)) {
+        checkbox.checked = true;
+      }
+    });
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
 
       const srcgbutton = document.getElementById('SrcGrp');
       srcgbutton.addEventListener('click', () => {
