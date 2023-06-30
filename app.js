@@ -215,13 +215,6 @@ client.on('message', async (msg) => {
 
   if (listenGroups.includes(msg.from) || msg.from == sourceGroup && msg.body != '!מחק') {
 
-    if(msg.body.endsWith('~')){
-      signaturetxt = ""
-      msgbody =  msg.body.slice(0, -1);
-    }else{
-      msgbody = msg.body
-      signaturetxt = (await database.read("Signature", { status: "Signature" })).text
-    }
 
     for (var Group in targetGroups) {
 
