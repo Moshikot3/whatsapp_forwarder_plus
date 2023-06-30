@@ -217,8 +217,9 @@ client.on('message', async (msg) => {
 
     if(msg.body.endsWith('~')){
       signaturetxt = ""
-      msg.body =  msg.body.slice(0, -1);
+      msgbody =  msg.body.slice(0, -1);
     }else{
+      msgbody = msg.body
       signaturetxt = (await database.read("Signature", { status: "Signature" })).text
     }
 
@@ -227,7 +228,7 @@ client.on('message', async (msg) => {
       if (msg.type == 'chat') {
         console.log("Send message")
         console.log(signaturetxt);
-        await client.sendMessage(targetGroups[Group], msg.body + "\n\n" + signaturetxt);
+        await client.sendMessage(targetGroups[Group], msgbody + "\n\n" + signaturetxt);
       } else if (msg.type == 'ptt') {
         console.log("Send audio")
         let audio = await msg.downloadMedia();
@@ -236,11 +237,11 @@ client.on('message', async (msg) => {
         console.log("Send image/video")
         let attachmentData = await msg.downloadMedia();
         // Error mostly comes from sending video
-          if(msg.body == "" || msg.body == " "){
+          if(msgbody == "" || msgbody == " "){
 
-            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
+            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msgbody });
           }else{
-            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + "\n\n" + signaturetxt });
+            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msgbody + "\n\n" + signaturetxt });
           }
         
       } else if (msg.type == 'sticker') {
