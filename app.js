@@ -63,7 +63,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath: '/usr/bin/google-chrome',
-    headless: false
+    headless: true
   }
 });
 
