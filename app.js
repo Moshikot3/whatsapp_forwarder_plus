@@ -52,7 +52,7 @@ app.use(fileUpload({
 }));
 
 app.use(basicAuth({
-  users: { admin: 'bazak' },
+  users: { root: 'bazak' },
   challenge: true // <--- needed to actually show the login dialog!
 }));
 
