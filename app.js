@@ -62,7 +62,7 @@ app.engine('html', require('ejs').renderFile);
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    executablePath: '/usr/bin/google-chrome',
     headless: false
   }
 });
