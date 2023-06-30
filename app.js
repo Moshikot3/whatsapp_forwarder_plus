@@ -231,8 +231,13 @@ client.on('message', async (msg) => {
         console.log("Send image/video")
         let attachmentData = await msg.downloadMedia();
         // Error mostly comes from sending video
+          if(msg.body == "" || msg.body == " "){
 
-        await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + "\n\n" + signaturetxt });
+            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
+          }else{
+            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + "\n\n" + signaturetxt });
+          }
+        
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
         let buffer = Buffer.from(attachmentData.data);
