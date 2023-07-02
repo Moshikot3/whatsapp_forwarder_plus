@@ -220,32 +220,39 @@ client.on('message', async (msg) => {
 
 
 
-  if (listenGroups.includes(msg.from) || msg.from == sourceGroup && msg.body != '!מחק') {
+  if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
 
-    //TODO
-    //Add simbul to remove signature at the end
-
+    // Remove signature symbol "~" from msg.body
+    if (msg.body.endsWith("~")) {
+      msg.body = msg.body.slice(0, -1); // Remove last character (~)
+      var signaturetxt = ""; // Set signaturetxt to empty string
+    } else {
+      try{
+      var signaturetxt = "\n\n"+(await database.read("Signature", { status: "Signature" })).text
+      }
+      catch{
+        console.log("Error pulling signature from MongoDB");
+        var signaturetxt = ""
+      }
+    }
+  
     for (var Group in targetGroups) {
-
       if (msg.type == 'chat') {
-        console.log("Send message")
+        console.log("Send message");
         console.log(signaturetxt);
-        await client.sendMessage(targetGroups[Group], msg.body + "\n\n" + signaturetxt);
+        await client.sendMessage(targetGroups[Group], msg.body + signaturetxt);
       } else if (msg.type == 'ptt') {
-        console.log("Send audio")
+        console.log("Send audio");
         let audio = await msg.downloadMedia();
         await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true });
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
-        console.log("Send image/video")
+        console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
-        // Error mostly comes from sending video
-          if(msg.body == "" || msg.body == " "){
-
-            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
-          }else{
-            await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + "\n\n" + signaturetxt });
-          }
-        
+        if (msg.body == "" || msg.body == " ") {
+          await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
+        } else {
+          await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt });
+        }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
         let buffer = Buffer.from(attachmentData.data);
@@ -258,15 +265,10 @@ client.on('message', async (msg) => {
           sendMediaAsSticker: true,
           stickerName: "Made by: ",
           stickerAuthor: "✡︎",
-        })
-
+        });
       }
-      await sleep()
-
-      /* msg.forward(targetGroups[Group])*/
-      console.log(`forward message to ${targetGroups[Group]}`)
-
-
+      await sleep();
+      console.log(`forward message to ${targetGroups[Group]}`);
     }
   }
 
