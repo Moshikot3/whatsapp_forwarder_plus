@@ -62,7 +62,14 @@ app.engine('html', require('ejs').renderFile);
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
+    //Linux
     executablePath: '/usr/bin/google-chrome',
+    //Windows
+    //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    //Mac
+    //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    
+    
     headless: true
   }
 });
@@ -383,5 +390,3 @@ server.listen(port, function () {
 });
 
 client.initialize();
-
-
