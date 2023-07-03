@@ -63,9 +63,9 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     //Linux
-    executablePath: '/usr/bin/google-chrome',
+    //executablePath: '/usr/bin/google-chrome',
     //Windows
-    //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
     //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     
@@ -263,8 +263,8 @@ client.on('message', async (msg) => {
         await client.sendMessage(targetGroups[Group], attachmentData, {
           extra: {},
           sendMediaAsSticker: true,
-          stickerName: "Made by: ",
-          stickerAuthor: "✡︎",
+          stickerName: "חדשות הבזק",
+          stickerAuthor: "חדשות הבזק",
         });
       }
       await sleep();
