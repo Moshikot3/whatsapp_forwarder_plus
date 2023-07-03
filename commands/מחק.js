@@ -5,8 +5,13 @@ const database = require("../helpers/db_helper");
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
     let delmsgid = undefined
+    console.log(msg);
 
     if (msg.from == sourceGroup && msg.body == '!מחק') {
+        if(msg.hasQuotedMsg == false){
+            msg.reply("יש לצטט את ההודעה אשר ברצונך למחוק");
+            return;
+        }
         delmsgid = msg._data.quotedStanzaID;
         let delmsginfo = undefined
         try {
