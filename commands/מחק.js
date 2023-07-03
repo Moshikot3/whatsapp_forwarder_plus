@@ -56,9 +56,9 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
 module.exports = {
     name: 'מחק',
-    description: 'מוחק את הפרסום האחרון',
+    description: 'מוחק הודעה מצוטטת',
     command: '!מחק',
-    commandType: 'admin',
+    commandType: 'plugin',
     isGroupOnly: true,
     isDependent: false,
     help: `*מחק*\n\nמוחק את התגובה האחרונה.\n`,
