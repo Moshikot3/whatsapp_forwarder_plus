@@ -63,9 +63,9 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     //Linux
-    //executablePath: '/usr/bin/google-chrome',
+    executablePath: '/usr/bin/google-chrome',
     //Windows
-    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
     //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     
@@ -228,9 +228,7 @@ client.on('message', async (msg) => {
     try{await database.insert("messages", { messageid: msg.id.id } , { srcgroup: msg.from, msgtext: msg.body });
     console.log("srcgroup wrote in db");}
     catch{console.log("Error saving srcmsgid to MongoDB");}
-    console.log("MESSAGE ID:");
-    console.log(msg.id);
-
+  
 
     // if(await database.add("Messages", { srcmsgid: msg.id }, { msgid: msg.id._serialized })){
     //   console.log("New message writted to MongoDB");
@@ -249,23 +247,25 @@ client.on('message', async (msg) => {
         var signaturetxt = ""
       }
     }
-  
+    let trgroupsmsgid = [];
+    let trgroupsid = [];
     for (var Group in targetGroups) {
+      let trmsg = undefined;
       if (msg.type == 'chat') {
         console.log("Send message");
         console.log(signaturetxt);
-        await client.sendMessage(targetGroups[Group], msg.body + signaturetxt);
+        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
-        await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true });
+        trmsg = await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true });
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
         } else {
-          await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt });
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
@@ -274,16 +274,27 @@ client.on('message', async (msg) => {
           console.log("אאאאיפה אחי כבד");
           return;
         }
-        await client.sendMessage(targetGroups[Group], attachmentData, {
-          extra: {},
-          sendMediaAsSticker: true,
-          stickerName: "חדשות הבזק",
-          stickerAuthor: "חדשות הבזק",
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {
+            extra: {},
+            sendMediaAsSticker: true,
+            stickerName: "חדשות הבזק",
+            stickerAuthor: "חדשות הבזק",
         });
       }
       await sleep();
       console.log(`forward message to ${targetGroups[Group]}`);
+
+      trgroupsmsgid.push(trmsg._data.id.id);
+      trgroupsid.push(targetGroups[Group]);
+      
+
     }
+
+      //saving messages targetgroups
+      try{await database.insert("messages", { messageid: msg.id.id } , { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+      }
+      catch{console.log("Error saving srcmsgid to MongoDB");}
+
   }
 
   if (msg.type == 'list_response') {
