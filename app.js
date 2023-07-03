@@ -222,6 +222,20 @@ client.on('message', async (msg) => {
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
 
+
+        
+    //Implating save messages
+    try{await database.insert("messages", { messageid: msg.id.id } , { srcgroup: msg.from, msgtext: msg.body });
+    console.log("srcgroup wrote in db");}
+    catch{console.log("Error saving srcmsgid to MongoDB");}
+    console.log("MESSAGE ID:");
+    console.log(msg.id);
+
+
+    // if(await database.add("Messages", { srcmsgid: msg.id }, { msgid: msg.id._serialized })){
+    //   console.log("New message writted to MongoDB");
+    // }
+
     // Remove signature symbol "~" from msg.body
     if (msg.body.endsWith("~")) {
       msg.body = msg.body.slice(0, -1); // Remove last character (~)
