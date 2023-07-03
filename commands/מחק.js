@@ -1,17 +1,52 @@
 const sleep = require('../helpers/sleep_helper.js');
+const database = require("../helpers/db_helper");
+
+
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
-    if(msg.from == sourceGroup && msg.body == '!מחק'){
+    let delmsgid = undefined
 
-        for(var Group in targetGroups){
-    
-          let chat = await client.getChatById(targetGroups[Group]);
-          let [lastMessage] = await chat.fetchMessages({limit: 1});
-          await lastMessage.delete(true);
-          await sleep.sleep()
-       }
-    
-    
+    if (msg.from == sourceGroup && msg.body == '!מחק') {
+        delmsgid = msg._data.quotedStanzaID;
+        let delmsginfo = undefined
+        try {
+            delmsginfo = await database.read("messages", { messageid: delmsgid })
+
+            msg.reply("אני על זה, נא להעזר בסבלנות");
+
+        } catch {
+            msg.reply("הודעה לא קיימת במאגר / אין חיבור למסד נתונים מונגו.");
+            return;
+        }
+
+
+        //console.log(msg);
+        try{
+        for (let i = 0; i < delmsginfo.trgroup.length; i++) {
+            const trGroup = delmsginfo.trgroup[i];
+            const trMessageID = delmsginfo.trgtmsgID[i];
+            console.log(`The selected group is ${trGroup} with ID ${trMessageID}`);
+            console.log(trMessageID);
+
+            let chat = await client.getChatById(trGroup);
+            let chatHistory = (await chat.fetchMessages({ limit: 100 }));
+            for (const message of chatHistory) {
+                if (message._data.id.id == trMessageID) {
+
+                    await message.delete(true);
+                }
+            }
+
+            await sleep.sleep()
+
+
+        }
+        }catch{
+            msg.reply("תקלה במחיקת הודעות, נא לפנות למפתח");
+            return;
+        }
+
+        msg.reply("סיימתי");
     }
 };
 
@@ -20,9 +55,10 @@ module.exports = {
     description: 'מוחק את הפרסום האחרון',
     command: '!מחק',
     commandType: 'admin',
-    isGroupOnly:true,
+    isGroupOnly: true,
     isDependent: false,
     help: `*מחק*\n\nמוחק את התגובה האחרונה.\n`,
-    execute};
+    execute
+};
 
 
