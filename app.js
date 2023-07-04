@@ -295,6 +295,8 @@ client.on('message', async (msg) => {
       }
       catch{console.log("Error saving srcmsgid to MongoDB");}
 
+      msg.reply("הפצת ההודעה הסתיימה.");
+
   }
 
   if (msg.type == 'list_response') {
