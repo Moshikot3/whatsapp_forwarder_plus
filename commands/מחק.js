@@ -41,7 +41,7 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
                 }
             }
 
-            await sleep.sleep()
+            await sleep.sleep();
 
 
         }
