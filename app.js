@@ -2,7 +2,6 @@ const { Client, LocalAuth, Buttons } = require('whatsapp-web.js');
 const express = require('express');
 const basicAuth = require('express-basic-auth');
 const rateLimit = require('express-rate-limit')
-const configfile = require('./config.json');
 const socketIO = require('socket.io');
 const qrcode = require('qrcode');
 const http = require('http');
