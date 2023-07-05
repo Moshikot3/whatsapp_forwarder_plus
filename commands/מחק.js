@@ -46,7 +46,7 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
         }
         }catch{
-            msg.reply("תקלה במחיקת הודעות, נא לפנות למפתח");
+            msg.reply("תקלה במחיקת הודעה - וודא כי הפצת ההודעה הסתיימה לפני מחיקה, במידה והתקלה נמשכת יש לפנות למפתח.");
             return;
         }
 
