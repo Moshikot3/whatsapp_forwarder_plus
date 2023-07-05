@@ -5,7 +5,6 @@ const database = require("../helpers/db_helper");
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
     let delmsgid = undefined
-    console.log(msg);
 
     if (msg.from == sourceGroup && msg.body == '!מחק') {
         if(msg.hasQuotedMsg == false){
@@ -42,12 +41,12 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
                 }
             }
 
-            await sleep.sleep()
+            await sleep.sleep();
 
 
         }
         }catch{
-            msg.reply("תקלה במחיקת הודעות, נא לפנות למפתח");
+            msg.reply("תקלה במחיקת הודעה - וודא כי הפצת ההודעה הסתיימה לפני מחיקה וכי אתה מצטט את *ההודעה הנכונה*, במידה והתקלה נמשכת יש לפנות למפתח.");
             return;
         }
 
@@ -57,9 +56,9 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
 module.exports = {
     name: 'מחק',
-    description: 'מוחק את הפרסום האחרון',
+    description: 'מוחק הודעה מצוטטת',
     command: '!מחק',
-    commandType: 'admin',
+    commandType: 'plugin',
     isGroupOnly: true,
     isDependent: false,
     help: `*מחק*\n\nמוחק את התגובה האחרונה.\n`,

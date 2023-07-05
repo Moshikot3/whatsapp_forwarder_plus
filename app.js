@@ -2,7 +2,6 @@ const { Client, LocalAuth, Buttons } = require('whatsapp-web.js');
 const express = require('express');
 const basicAuth = require('express-basic-auth');
 const rateLimit = require('express-rate-limit')
-const configfile = require('./config.json');
 const socketIO = require('socket.io');
 const qrcode = require('qrcode');
 const http = require('http');
@@ -222,6 +221,20 @@ client.on('message', async (msg) => {
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
 
+    // if(msg.hasQuotedMsg){
+    //   console.log(await msg.getQuotedMessage());
+    //   console.log("==============END OF QUOTED MESSAGE==============");
+    //   console.log(msg.id);
+    //   console.log("==============END OF NORMAL==============");
+    //   const author = await msg.getContact();
+    //   await client.sendMessage(msg.from, "רשמתי אותך כבר, לא לחפור...",{extra: {
+    //     quotedMsg: {
+    //         body: "מגיע",
+    //         type: "chat"
+    //     },
+    //     quotedStanzaID: 'B3D43D423729E61AC2',
+    //     quotedParticipant: author.id._serialized}});
+    // }
 
         
     //Implating save messages
@@ -251,6 +264,7 @@ client.on('message', async (msg) => {
     let trgroupsid = [];
     for (var Group in targetGroups) {
       let trmsg = undefined;
+
       if (msg.type == 'chat') {
         console.log("Send message");
         console.log(signaturetxt);
@@ -294,6 +308,8 @@ client.on('message', async (msg) => {
       try{await database.insert("messages", { messageid: msg.id.id } , { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
       }
       catch{console.log("Error saving srcmsgid to MongoDB");}
+
+      msg.reply("הפצת ההודעה הסתיימה.");
 
   }
 
