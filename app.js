@@ -20,6 +20,7 @@ const sourceGroup = datasync.sourceGroup
 const targetGroups = datasync.targetGroups
 const signaturetxt = datasync.signaturetxt
 
+
 //Crapbot mitigation
 const fs = require('fs');
 const users = require('./helpers/users_helper');
@@ -67,11 +68,14 @@ const client = new Client({
     //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
     //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    
-    
+
+
     headless: true
   }
 });
+
+
+
 
 client.commands = new Map();
 
@@ -108,12 +112,15 @@ client.on('ready', async () => {
   const targetGroups = datasync.targetGroups
   const signaturetxt = datasync.signaturetxt
 
+
+
   console.log("Listen Group - " + listenGroups);
   console.log("Source Group - " + sourceGroup);
   console.log("Target Group - " + targetGroups);
   console.log("Signature - " + signaturetxt);
   console.log('client is ready!');
 
+ 
   await client.getChats().then(chats => {
     const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
     if (groups.length == 0) {
@@ -134,6 +141,7 @@ client.on('ready', async () => {
     }
   });
 
+  
 
   client.pupPage.on('dialog', async dialog => {
     console.log("Refresh popup just dismissed")
@@ -145,7 +153,6 @@ client.on('ready', async () => {
     console.log('Client is ready again!');
   });
 });
-
 
 
 client.on('authenticated', () => {
@@ -172,6 +179,7 @@ client.on('disconnected', (reason) => {
 
 client.on('message', async (msg) => {
 
+  
   console.log("Listen Group - " + listenGroups);
   console.log("Source Group - " + sourceGroup);
   console.log("Target Group - " + targetGroups);
@@ -220,28 +228,41 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
+    const clientInfo = client.info
 
-    // if(msg.hasQuotedMsg){
-    //   console.log(await msg.getQuotedMessage());
-    //   console.log("==============END OF QUOTED MESSAGE==============");
-    //   console.log(msg.id);
-    //   console.log("==============END OF NORMAL==============");
-    //   const author = await msg.getContact();
-    //   await client.sendMessage(msg.from, "רשמתי אותך כבר, לא לחפור...",{extra: {
-    //     quotedMsg: {
-    //         body: "מגיע",
-    //         type: "chat"
-    //     },
-    //     quotedStanzaID: 'B3D43D423729E61AC2',
-    //     quotedParticipant: author.id._serialized}});
-    // }
+    let qutmsginfo = undefined;
+    let quotemsg = undefined;
+    
 
-        
+
+    if(msg.hasQuotedMsg){
+    let qutmsgid = msg._data.quotedStanzaID;
+    
+
+    
+
+      console.log(qutmsgid);
+      try {
+        qutmsginfo = await database.read("messages", { messageid: qutmsgid })
+        quotemsg = await msg.getQuotedMessage();
+      if (!qutmsginfo || qutmsginfo == "") {
+        msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
+        return;
+      }
+
+    } catch {
+      msg.reply("האין חיבור למסד נתונים מונגו.");
+      return;
+    }
+    }
+
     //Implating save messages
-    try{await database.insert("messages", { messageid: msg.id.id } , { srcgroup: msg.from, msgtext: msg.body });
-    console.log("srcgroup wrote in db");}
-    catch{console.log("Error saving srcmsgid to MongoDB");}
-  
+    try {
+      await database.insert("messages", { messageid: msg.id.id }, { srcgroup: msg.from, msgtext: msg.body });
+      console.log("srcgroup wrote in db");
+    }
+    catch { console.log("Error saving srcmsgid to MongoDB"); }
+
 
     // if(await database.add("Messages", { srcmsgid: msg.id }, { msgid: msg.id._serialized })){
     //   console.log("New message writted to MongoDB");
@@ -252,10 +273,10 @@ client.on('message', async (msg) => {
       msg.body = msg.body.slice(0, -1); // Remove last character (~)
       var signaturetxt = ""; // Set signaturetxt to empty string
     } else {
-      try{
-      var signaturetxt = "\n\n"+(await database.read("Signature", { status: "Signature" })).text
+      try {
+        var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text
       }
-      catch{
+      catch {
         console.log("Error pulling signature from MongoDB");
         var signaturetxt = ""
       }
@@ -264,11 +285,40 @@ client.on('message', async (msg) => {
     let trgroupsid = [];
     for (var Group in targetGroups) {
       let trmsg = undefined;
+      let extras = null;
+
+      //quote messages handeling
+      if (msg.hasQuotedMsg) {
+        
+        for (let i = 0; i < qutmsginfo.trgroup.length; i++) {
+          const trGroup = qutmsginfo.trgroup[i];
+          const trMessageID = qutmsginfo.trgtmsgID[i];
+          console.log("Trgroup: "+ trGroup+", GROUP: "+Group);
+          if (trGroup == targetGroups[Group]) {
+            extras = {
+              extra: {
+                quotedMsg: {
+                  body: quotemsg.body,
+                  type: quotemsg.type
+                },
+                quotedStanzaID: trMessageID,
+                quotedParticipant: clientInfo.wid._serialized
+              }
+            }
+            console.log("EXTRAS BELOW");
+            console.log(extras);
+            
+          }
+        }
+
+      }else{
+        extras = {}
+      }
 
       if (msg.type == 'chat') {
         console.log("Send message");
         console.log(signaturetxt);
-        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt);
+        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt, extras);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
@@ -288,11 +338,11 @@ client.on('message', async (msg) => {
           console.log("אאאאיפה אחי כבד");
           return;
         }
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {
-            extra: {},
-            sendMediaAsSticker: true,
-            stickerName: "חדשות הבזק",
-            stickerAuthor: "חדשות הבזק",
+        trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {
+          extra: {},
+          sendMediaAsSticker: true,
+          stickerName: "חדשות הבזק",
+          stickerAuthor: "חדשות הבזק",
         });
       }
       await sleep();
@@ -300,16 +350,17 @@ client.on('message', async (msg) => {
 
       trgroupsmsgid.push(trmsg._data.id.id);
       trgroupsid.push(targetGroups[Group]);
-      
+
 
     }
 
-      //saving messages targetgroups
-      try{await database.insert("messages", { messageid: msg.id.id } , { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
-      }
-      catch{console.log("Error saving srcmsgid to MongoDB");}
+    //saving messages targetgroups
+    try {
+      await database.insert("messages", { messageid: msg.id.id }, { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+    }
+    catch { console.log("Error saving srcmsgid to MongoDB"); }
 
-      msg.reply("הפצת ההודעה הסתיימה.");
+    msg.reply("הפצת ההודעה הסתיימה.");
 
   }
 
@@ -431,5 +482,7 @@ app.post('/signature-click', async (req, res) => {
 server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
+
+
 
 client.initialize();
