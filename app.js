@@ -63,9 +63,9 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     //Linux
-    executablePath: '/usr/bin/google-chrome',
+    //executablePath: '/usr/bin/google-chrome',
     //Windows
-    //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
     //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 
@@ -229,7 +229,6 @@ client.on('message', async (msg) => {
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
     const clientInfo = client.info
-
     let qutmsginfo = undefined;
     let quotemsg = undefined;
     
@@ -245,7 +244,9 @@ client.on('message', async (msg) => {
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
-      if (!qutmsginfo || qutmsginfo == "") {
+        
+        console.log(quotemsg);
+      if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
         msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
         return;
       }
@@ -288,7 +289,7 @@ client.on('message', async (msg) => {
       let extras = null;
 
       //quote messages handeling
-      if (msg.hasQuotedMsg) {
+      if (msg.hasQuotedMsg && qutmsginfo.trgroup) {
         
         for (let i = 0; i < qutmsginfo.trgroup.length; i++) {
           const trGroup = qutmsginfo.trgroup[i];
@@ -298,6 +299,7 @@ client.on('message', async (msg) => {
             extras = {
               extra: {
                 quotedMsg: {
+                  caption: quotemsg.body,
                   body: quotemsg.body,
                   type: quotemsg.type
                 },
@@ -307,6 +309,7 @@ client.on('message', async (msg) => {
             }
             console.log("EXTRAS BELOW");
             console.log(extras);
+            break;
             
           }
         }
@@ -322,14 +325,14 @@ client.on('message', async (msg) => {
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
-        trmsg = await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true });
+        trmsg = await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true }, extras);
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body }, extras);
         } else {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt }, extras);
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
@@ -339,7 +342,7 @@ client.on('message', async (msg) => {
           return;
         }
         trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {
-          extra: {},
+          extra: extras.extra,
           sendMediaAsSticker: true,
           stickerName: "חדשות הבזק",
           stickerAuthor: "חדשות הבזק",
