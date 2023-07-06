@@ -367,7 +367,7 @@ client.on('message', async (msg) => {
     }
     catch { console.log("Error saving srcmsgid to MongoDB"); }
 
-    msg.reply("הפצת ההודעה הסתיימה.");
+    //msg.reply("הפצת ההודעה הסתיימה.");
     msg.react("✅");
 
   }
