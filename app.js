@@ -228,6 +228,8 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
+    await msg.react("👍");
+
     const clientInfo = client.info
     let qutmsginfo = undefined;
     let quotemsg = undefined;
@@ -252,6 +254,7 @@ client.on('message', async (msg) => {
       }
 
     } catch {
+      await msg.react();
       msg.reply("האין חיבור למסד נתונים מונגו.");
       return;
     }
@@ -278,6 +281,7 @@ client.on('message', async (msg) => {
         var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text
       }
       catch {
+        await msg.react("");
         console.log("Error pulling signature from MongoDB");
         var signaturetxt = ""
       }
