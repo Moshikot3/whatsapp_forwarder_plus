@@ -120,7 +120,7 @@ client.on('ready', async () => {
   console.log("Signature - " + signaturetxt);
   console.log('client is ready!');
 
- 
+
   await client.getChats().then(chats => {
     const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
     if (groups.length == 0) {
@@ -141,7 +141,7 @@ client.on('ready', async () => {
     }
   });
 
-  
+
 
   client.pupPage.on('dialog', async dialog => {
     console.log("Refresh popup just dismissed")
@@ -179,7 +179,7 @@ client.on('disconnected', (reason) => {
 
 client.on('message', async (msg) => {
 
-  
+
   console.log("Listen Group - " + listenGroups);
   console.log("Source Group - " + sourceGroup);
   console.log("Target Group - " + targetGroups);
@@ -233,31 +233,31 @@ client.on('message', async (msg) => {
     const clientInfo = client.info
     let qutmsginfo = undefined;
     let quotemsg = undefined;
-    
 
 
-    if(msg.hasQuotedMsg){
-    let qutmsgid = msg._data.quotedStanzaID;
-    
 
-    
+    if (msg.hasQuotedMsg) {
+      let qutmsgid = msg._data.quotedStanzaID;
+
+
+
 
       //console.log(qutmsgid);
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
-        
+
         //console.log(quotemsg);
-      if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
-        msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
+        if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
+          msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
+          return;
+        }
+
+      } catch {
+        await msg.react("");
+        msg.reply("האין חיבור למסד נתונים מונגו.");
         return;
       }
-
-    } catch {
-      await msg.react("");
-      msg.reply("האין חיבור למסד נתונים מונגו.");
-      return;
-    }
     }
 
     //Implating save messages
@@ -294,11 +294,11 @@ client.on('message', async (msg) => {
 
       //quote messages handeling
       if (msg.hasQuotedMsg && qutmsginfo.trgroup) {
-        
+
         for (let i = 0; i < qutmsginfo.trgroup.length; i++) {
           const trGroup = qutmsginfo.trgroup[i];
           const trMessageID = qutmsginfo.trgtmsgID[i];
-          console.log("Trgroup: "+ trGroup+", GROUP: "+Group);
+          console.log("Trgroup: " + trGroup + ", GROUP: " + Group);
           if (trGroup == targetGroups[Group]) {
             extras = {
               extra: {
@@ -314,11 +314,11 @@ client.on('message', async (msg) => {
             console.log("EXTRAS BELOW");
             console.log(extras);
             break;
-            
+
           }
         }
 
-      }else{
+      } else {
         extras = {}
       }
 
@@ -334,9 +334,9 @@ client.on('message', async (msg) => {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {extra: extras.extra ,caption: msg.body });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { extra: extras.extra, caption: msg.body });
         } else {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {extra: extras.extra ,caption: msg.body + signaturetxt });
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { extra: extras.extra, caption: msg.body + signaturetxt });
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
