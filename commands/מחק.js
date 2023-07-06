@@ -7,7 +7,7 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
     let delmsgid = undefined
 
     if (msg.from == sourceGroup && msg.body == '!מחק') {
-        await msg.react("👍");
+        await msg.react("🔄");
         if(msg.hasQuotedMsg == false){
             msg.reply("יש לצטט את ההודעה אשר ברצונך למחוק");
             return;
@@ -21,8 +21,9 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
         } catch {
             msg.reply("הודעה לא קיימת במאגר / אין חיבור למסד נתונים מונגו.");
+            msg.react("❌");
             return;
-            await msg.react("👍");
+             
         }
 
 
@@ -49,7 +50,7 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
         }
         }catch{
             msg.reply("תקלה במחיקת הודעה - וודא כי הפצת ההודעה הסתיימה לפני מחיקה וכי אתה מצטט את *ההודעה הנכונה*, במידה והתקלה נמשכת יש לפנות למפתח.");
-            await msg.react("");
+            await msg.react("❌");
             return;
         }
 

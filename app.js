@@ -228,7 +228,7 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
-    await msg.react("👍");
+    await msg.react("🔄");
 
     const clientInfo = client.info
     let qutmsginfo = undefined;
@@ -254,7 +254,7 @@ client.on('message', async (msg) => {
         }
 
       } catch {
-        await msg.react("");
+        await msg.react("❌");
         msg.reply("האין חיבור למסד נתונים מונגו.");
         return;
       }
@@ -281,7 +281,7 @@ client.on('message', async (msg) => {
         var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text
       }
       catch {
-        await msg.react("");
+        await msg.react("❌");
         console.log("Error pulling signature from MongoDB");
         var signaturetxt = ""
       }
@@ -368,7 +368,7 @@ client.on('message', async (msg) => {
     catch { console.log("Error saving srcmsgid to MongoDB"); }
 
     msg.reply("הפצת ההודעה הסתיימה.");
-    await msg.react("✅");
+    msg.react("✅");
 
   }
 
