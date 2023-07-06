@@ -63,11 +63,11 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     //Linux
-    //executablePath: '/usr/bin/google-chrome',
+    executablePath: '/usr/bin/google-chrome',
     //Windows
     //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
-    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 
 
     headless: true
@@ -255,21 +255,6 @@ client.on('message', async (msg) => {
       return;
     }
     }
-    // if(msg.hasQuotedMsg){
-    //   console.log(await msg.getQuotedMessage());
-    //   console.log("==============END OF QUOTED MESSAGE==============");
-    //   console.log(msg.id);
-    //   console.log("==============END OF NORMAL==============");
-    //   const author = await msg.getContact();
-    //   await client.sendMessage(msg.from, "רשמתי אותך כבר, לא לחפור...",{extra: {
-    //     quotedMsg: {
-    //         body: "מגיע",
-    //         type: "chat"
-    //     },
-    //     quotedStanzaID: 'B3D43D423729E61AC2',
-    //     quotedParticipant: author.id._serialized}});
-    // }
-
 
     //Implating save messages
     try {
@@ -300,7 +285,7 @@ client.on('message', async (msg) => {
     let trgroupsid = [];
     for (var Group in targetGroups) {
       let trmsg = undefined;
-      let extras = null
+      let extras = null;
 
       //quote messages handeling
       if (msg.hasQuotedMsg) {
