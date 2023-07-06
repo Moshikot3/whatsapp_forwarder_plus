@@ -352,8 +352,6 @@ client.on('message', async (msg) => {
       console.log(`forward message to ${targetGroups[Group]}`);
 
       trgroupsmsgid.push(trmsg._data.id.id);
-
-      console.log(trmsg);
       trgroupsid.push(targetGroups[Group]);
 
 
