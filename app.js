@@ -254,7 +254,7 @@ client.on('message', async (msg) => {
       }
 
     } catch {
-      await msg.react();
+      await msg.react("");
       msg.reply("האין חיבור למסד נתונים מונגו.");
       return;
     }
@@ -368,6 +368,7 @@ client.on('message', async (msg) => {
     catch { console.log("Error saving srcmsgid to MongoDB"); }
 
     msg.reply("הפצת ההודעה הסתיימה.");
+    await msg.react("✅");
 
   }
 
