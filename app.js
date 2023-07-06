@@ -240,12 +240,12 @@ client.on('message', async (msg) => {
 
     
 
-      console.log(qutmsgid);
+      //console.log(qutmsgid);
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
         
-        console.log(quotemsg);
+        //console.log(quotemsg);
       if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
         msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
         return;
@@ -330,9 +330,9 @@ client.on('message', async (msg) => {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body }, extras);
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {extra: extras.extra ,caption: msg.body });
         } else {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { caption: msg.body + signaturetxt }, extras);
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {extra: extras.extra ,caption: msg.body + signaturetxt });
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
@@ -352,6 +352,8 @@ client.on('message', async (msg) => {
       console.log(`forward message to ${targetGroups[Group]}`);
 
       trgroupsmsgid.push(trmsg._data.id.id);
+
+      console.log(trmsg);
       trgroupsid.push(targetGroups[Group]);
 
 
