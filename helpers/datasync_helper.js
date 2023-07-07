@@ -11,6 +11,7 @@ function empty(array) {
 }
   
 
+
 async function sync(client){
 
 
@@ -25,6 +26,7 @@ async function sync(client){
     empty(signaturetxt)
 
     let dataSignature = await database.read("Signature", { status: "Signature" });
+    let dataTargets = (await database.read("Target", { status: "TargetGroup" })).trgroups;
 
     for(const chat of chats){
         
@@ -35,7 +37,7 @@ async function sync(client){
             let mongoid = { group_id: chatid }
             let dataListeners = await database.read("Listeners", mongoid);
             let dataSource = await database.read("Source", mongoid);
-            let dataTargets = await database.read("Target", mongoid);
+
             if(!dataListeners && !dataSource && !dataTargets){
                 continue
             }
@@ -48,16 +50,15 @@ async function sync(client){
 
                 sourceGroup.push(dataSource.group_id);
             }
-
-            if(dataTargets){
-
-
-                targetGroups.push(dataTargets.group_id);
-            }
         }
 
     }
 
+    if(dataTargets){
+
+
+        targetGroups.push(dataTargets);
+    }
     if(dataSignature){
 
         signaturetxt.push(dataSignature.text);

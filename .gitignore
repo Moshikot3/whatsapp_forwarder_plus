@@ -1,6 +1,8 @@
 #whatsapp-web.js
 .\wwebjs_auth
 .\wwebjs_cache
+.\test.js
+
 # Logs
 logs
 *.log

@@ -288,7 +288,8 @@ client.on('message', async (msg) => {
     }
     let trgroupsmsgid = [];
     let trgroupsid = [];
-    for (var Group in targetGroups) {
+
+    for (var Group in targetGroups[0]) {
       let trmsg = undefined;
       let extras = null;
 
@@ -300,7 +301,7 @@ client.on('message', async (msg) => {
           const trGroup = qutmsginfo.trgroup[i];
           const trMessageID = qutmsginfo.trgtmsgID[i];
           console.log("Trgroup: " + trGroup + ", GROUP: " + Group);
-          if (trGroup == targetGroups[Group]) {
+          if (trGroup == targetGroups[0][Group]) {
             options.quotedMessageId = "true_" + trGroup + "_" + trMessageID + "_" + clientInfo.wid._serialized;
             console.log("EXTRAS BELOW");
             console.log(options);
@@ -317,21 +318,21 @@ client.on('message', async (msg) => {
       if (msg.type == 'chat') {
         console.log("Send message");
         console.log(options);
-        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt, options);
+        trmsg = await client.sendMessage(targetGroups[0][Group], msg.body + signaturetxt, options);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
         options.sendAudioAsVoice = true;
-        trmsg = await client.sendMessage(targetGroups[Group], audio, options);
+        trmsg = await client.sendMessage(targetGroups[0][Group], audio, options);
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
           options.caption = msg.body;
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
+          trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
         } else {
           options.caption = msg.body + signaturetxt;
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
+          trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
@@ -343,13 +344,13 @@ client.on('message', async (msg) => {
         options.sendMediaAsSticker = true;
         options.stickerAuthor = "חדשות הבזק";
         options.stickerName = "חדשות הבזק";
-        trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
+        trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
       }
       await sleep();
-      console.log(`forward message to ${targetGroups[Group]}`);
+      console.log(`forward message to ${targetGroups[0][Group]}`);
 
       trgroupsmsgid.push(trmsg._data.id.id);
-      trgroupsid.push(targetGroups[Group]);
+      trgroupsid.push(targetGroups[0][Group]);
 
     }
 
@@ -394,8 +395,8 @@ app.get('/', async (req, res) => {
 
 app.get('/all-target-group-ids', async (req, res) => {
   try {
-    const groupIDs = await database.getAllGroupIDs("Target");
-    res.json(groupIDs);
+    const groupIDs = await database.read("Target", { status: "TargetGroup" });
+    res.json(groupIDs.trgroups);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -427,29 +428,23 @@ app.post('/button-click', async (req, res) => {
 
 
 
-// Define an endpoint for handling the button click from block 2 - Target Group
-app.post('/send-to-group', async (req, res) => {
+app.post('/send-tr-group', async (req, res) => {
   const groupIds = req.body.groups;
-  // Loop through each group ID
-  if (!database.drop("Target")) {
-    console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
-  }
-  groupIds.forEach(async groupId => {
-
-    if (database.read("Target", { group_id: groupId })) {
-      console.log("קבוצת יעד כבר הוגדרה, ניתן להגדיר קבוצה אחת בלבד, מעדכן את קבוצת השיגור לקבוצה שבחרת.");
-      if (!database.del("Target", { group_id: groupId })) {
-        console.log("קיימת תקלה במונגו, נא לפנות למפתח.");
-      }
-
+  
+  try{
+    if(database.read("Target", {status: "TargetGroup"})){
+       database.del("Target", {status: "TargetGroup"});
     }
-    database.insert("Target", { group_id: groupId }, { status: "TargetGroup" });
+    
+    await database.insert("Target", { status: "TargetGroup"}, { trgroups: groupIds });
 
-    console.log(`Added target group, group ID: ${groupId}`);
+  
+    await datasync.sync(client);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("An error occurred:", error);
+    res.sendStatus(500);
   }
-  );
-  datasync.sync(client);
-  res.sendStatus(200);
 });
 
 
