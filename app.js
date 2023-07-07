@@ -70,7 +70,7 @@ const client = new Client({
     //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 
 
-    headless: false
+    headless: true
   }
 });
 
