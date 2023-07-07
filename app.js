@@ -24,14 +24,7 @@ const signaturetxt = datasync.signaturetxt
 //Crapbot mitigation
 const fs = require('fs');
 const users = require('./helpers/users_helper');
-const { sign } = require('crypto');
-//const groups = require('./helpers/groups_helper.js');
-//const msgcount = require('./commands/msgcount');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
-
-// if (fs.existsSync(worker)) {
-//   fs.rmSync(worker, { recursive: true });
-// }
 
 function sleep() {
   return new Promise((resolve) => {
@@ -59,17 +52,22 @@ app.use(basicAuth({
 app.engine('html', require('ejs').renderFile);
 
 
+//Executable path:
+
+let executablePath = '';
+if (process.platform === 'linux') {
+  executablePath = '/usr/bin/google-chrome';
+} else if (process.platform === 'win32') {
+  executablePath = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+} else if (process.platform === 'darwin') {
+  executablePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+}
+
+
 const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
-    //Linux
-    executablePath: '/usr/bin/google-chrome',
-    //Windows
-    //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    //Mac
-    //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-
-
+    executablePath,
     headless: true
   }
 });
@@ -228,13 +226,13 @@ client.on('message', async (msg) => {
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
 
-    let author = msg.author
+    let author = msg.author;
     //console.log(msg);
     let options = {};
     await msg.react("🔄");
-    
 
-    const clientInfo = client.info
+
+    const clientInfo = client.info;
 
     console.log(clientInfo.wid._serialized);
     let qutmsginfo = undefined;
@@ -244,7 +242,7 @@ client.on('message', async (msg) => {
 
     if (msg.hasQuotedMsg) {
       let qutmsgid = msg._data.quotedStanzaID;
-      
+
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
@@ -280,7 +278,7 @@ client.on('message', async (msg) => {
       var signaturetxt = ""; // Set signaturetxt to empty string
     } else {
       try {
-        var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text
+        var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text;
       }
       catch {
         await msg.react("❌");
@@ -303,7 +301,7 @@ client.on('message', async (msg) => {
           const trMessageID = qutmsginfo.trgtmsgID[i];
           console.log("Trgroup: " + trGroup + ", GROUP: " + Group);
           if (trGroup == targetGroups[Group]) {
-            options.quotedMessageId = "true_"+trGroup+"_"+trMessageID+"_"+clientInfo.wid._serialized
+            options.quotedMessageId = "true_" + trGroup + "_" + trMessageID + "_" + clientInfo.wid._serialized;
             console.log("EXTRAS BELOW");
             console.log(options);
             break;
@@ -312,10 +310,10 @@ client.on('message', async (msg) => {
         }
 
       } else {
-        options = {}
+        options = {};
       }
-      
-      
+
+
       if (msg.type == 'chat') {
         console.log("Send message");
         console.log(options);
@@ -329,10 +327,10 @@ client.on('message', async (msg) => {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          options.caption = msg.body
+          options.caption = msg.body;
           trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
         } else {
-          options.caption = msg.body + signaturetxt
+          options.caption = msg.body + signaturetxt;
           trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
         }
       } else if (msg.type == 'sticker') {
@@ -354,7 +352,7 @@ client.on('message', async (msg) => {
       trgroupsid.push(targetGroups[Group]);
 
     }
-    
+
 
     //saving messages targetgroups
     try {
@@ -373,18 +371,18 @@ client.on('message', async (msg) => {
 
 app.get('/', async (req, res) => {
   let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
-  let signature = '' // Initialize signature variable
+  let signature = ''; // Initialize signature variable
 
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
   const isSignature = await database.read("Signature", { status: "Signature" });
 
   if (isSourceGroup) {
-    sourceGroupNaming = isSourceGroup.name
+    sourceGroupNaming = isSourceGroup.name;
   }
 
   if (isSignature) {
-    signature = isSignature.text
+    signature = isSignature.text;
   }
 
 
