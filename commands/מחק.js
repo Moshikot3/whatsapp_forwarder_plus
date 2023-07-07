@@ -55,6 +55,8 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
         }
 
         msg.reply("סיימתי");
+        await msg.react("✅");
+
     }
 };
 

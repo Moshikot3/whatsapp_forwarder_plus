@@ -63,14 +63,14 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     //Linux
-    executablePath: '/usr/bin/google-chrome',
+    //executablePath: '/usr/bin/google-chrome',
     //Windows
     //executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     //Mac
-    //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 
 
-    headless: true
+    headless: false
   }
 });
 
@@ -228,9 +228,12 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
+    //console.log(msg);
+    let options = {};
     await msg.react("🔄");
 
     const clientInfo = client.info
+    console.log(clientInfo.wid._serialized);
     let qutmsginfo = undefined;
     let quotemsg = undefined;
 
@@ -250,6 +253,7 @@ client.on('message', async (msg) => {
         //console.log(quotemsg);
         if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
           msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
+          await msg.react("❌");
           return;
         }
 
@@ -300,43 +304,37 @@ client.on('message', async (msg) => {
           const trMessageID = qutmsginfo.trgtmsgID[i];
           console.log("Trgroup: " + trGroup + ", GROUP: " + Group);
           if (trGroup == targetGroups[Group]) {
-            extras = {
-              extra: {
-                quotedMsg: {
-                  caption: quotemsg.body,
-                  body: quotemsg.body,
-                  type: quotemsg.type
-                },
-                quotedStanzaID: trMessageID,
-                quotedParticipant: clientInfo.wid._serialized
-              }
-            }
+            options.quotedMessageId = "true_"+trGroup+"_"+trMessageID+"_"+clientInfo.wid._serialized
             console.log("EXTRAS BELOW");
-            console.log(extras);
+            console.log(options);
             break;
 
           }
         }
 
       } else {
-        extras = {}
+        options = {}
       }
-
+      
+      
       if (msg.type == 'chat') {
         console.log("Send message");
-        console.log(signaturetxt);
-        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt, extras);
+        console.log(options);
+        trmsg = await client.sendMessage(targetGroups[Group], msg.body + signaturetxt, options);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
-        trmsg = await client.sendMessage(targetGroups[Group], audio, { sendAudioAsVoice: true }, extras);
+        options.sendAudioAsVoice = true;
+        trmsg = await client.sendMessage(targetGroups[Group], audio, options);
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
         console.log("Send image/video");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { extra: extras.extra, caption: msg.body });
+          options.caption = msg.body
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
         } else {
-          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, { extra: extras.extra, caption: msg.body + signaturetxt });
+          options.caption = msg.body + signaturetxt
+          trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
@@ -345,21 +343,20 @@ client.on('message', async (msg) => {
           console.log("אאאאיפה אחי כבד");
           return;
         }
-        trmsg = await client.sendMessage(targetGroups[Group], attachmentData, {
-          extra: extras.extra,
-          sendMediaAsSticker: true,
-          stickerName: "חדשות הבזק",
-          stickerAuthor: "חדשות הבזק",
-        });
+        options.sendMediaAsSticker = true;
+        options.stickerAuthor = "חדשות הבזק";
+        options.stickerName = "חדשות הבזק";
+        trmsg = await client.sendMessage(targetGroups[Group], attachmentData, options);
       }
       await sleep();
       console.log(`forward message to ${targetGroups[Group]}`);
 
       trgroupsmsgid.push(trmsg._data.id.id);
       trgroupsid.push(targetGroups[Group]);
-
+      console.log(trmsg);
 
     }
+    
 
     //saving messages targetgroups
     try {
