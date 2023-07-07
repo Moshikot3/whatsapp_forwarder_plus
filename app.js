@@ -184,7 +184,6 @@ client.on('message', async (msg) => {
   console.log("Source Group - " + sourceGroup);
   console.log("Target Group - " + targetGroups);
 
-  let author = msg.author || msg.from
   let chat = await msg.getChat();
 
   if (msg.body.startsWith("!")) {
@@ -228,11 +227,15 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
+
+    let author = msg.author
     //console.log(msg);
     let options = {};
     await msg.react("🔄");
+    
 
     const clientInfo = client.info
+
     console.log(clientInfo.wid._serialized);
     let qutmsginfo = undefined;
     let quotemsg = undefined;
@@ -241,16 +244,11 @@ client.on('message', async (msg) => {
 
     if (msg.hasQuotedMsg) {
       let qutmsgid = msg._data.quotedStanzaID;
-
-
-
-
-      //console.log(qutmsgid);
+      
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
 
-        //console.log(quotemsg);
         if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
           msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
           await msg.react("❌");
@@ -266,7 +264,7 @@ client.on('message', async (msg) => {
 
     //Implating save messages
     try {
-      await database.insert("messages", { messageid: msg.id.id }, { srcgroup: msg.from, msgtext: msg.body });
+      await database.insert("messages", { messageid: msg.id.id }, { srcgroup: msg.from, msgtext: msg.body, botsender: clientInfo.wid._serialized });
       console.log("srcgroup wrote in db");
     }
     catch { console.log("Error saving srcmsgid to MongoDB"); }
@@ -298,6 +296,7 @@ client.on('message', async (msg) => {
 
       //quote messages handeling
       if (msg.hasQuotedMsg && qutmsginfo.trgroup) {
+
 
         for (let i = 0; i < qutmsginfo.trgroup.length; i++) {
           const trGroup = qutmsginfo.trgroup[i];
@@ -353,7 +352,6 @@ client.on('message', async (msg) => {
 
       trgroupsmsgid.push(trmsg._data.id.id);
       trgroupsid.push(targetGroups[Group]);
-      console.log(trmsg);
 
     }
     
@@ -367,12 +365,6 @@ client.on('message', async (msg) => {
     //msg.reply("הפצת ההודעה הסתיימה.");
     msg.react("✅");
 
-  }
-
-  if (msg.type == 'list_response') {
-    let rowid = msg.selectedRowId
-    console.log(rowid);
-    listResponse.respond(client, msg, rowid);
   }
 
 });
