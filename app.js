@@ -13,6 +13,7 @@ const io = socketIO(server);
 const database = require("./helpers/db_helper");
 const datasync = require("./helpers/datasync_helper");
 const listResponse = require("./helpers/response_helper");
+const statistics = require("./helpers/stats_helper");
 const path = require('path');
 
 const listenGroups = datasync.listenGroups
@@ -118,6 +119,7 @@ client.on('ready', async () => {
   console.log("Signature - " + signaturetxt);
   console.log('client is ready!');
 
+  statistics.showstats(client, targetGroups);
 
   await client.getChats().then(chats => {
     const groups = chats.filter(chat => !chat.isReadOnly && chat.isGroup);
@@ -317,7 +319,6 @@ client.on('message', async (msg) => {
 
       if (msg.type == 'chat') {
         console.log("Send message");
-        console.log(options);
         trmsg = await client.sendMessage(targetGroups[0][Group], msg.body + signaturetxt, options);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
