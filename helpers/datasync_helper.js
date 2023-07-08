@@ -26,13 +26,13 @@ async function sync(client){
     empty(signaturetxt)
     let dataTargets = [];
     let dataSignature = await database.read("Signature", { status: "Signature" });
-    if((!await database.read("Target", { status: "TargetGroup" })).trgroups){
+    if(!(await database.read("Target", { status: "TargetGroup" }))){
         dataTargets = [];
     }else{
          dataTargets = (await database.read("Target", { status: "TargetGroup" })).trgroups;
     }
 
-    for(const chat of chats){s
+    for(const chat of chats){
         
 
         if(chat.isGroup && !chat.isReadOnly) {
