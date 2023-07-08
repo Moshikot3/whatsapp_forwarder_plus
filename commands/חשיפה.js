@@ -10,7 +10,7 @@ module.exports = {
     name: 'חשיפה',
     description: 'נתוני חשיפה',
     command: '!חשיפה',
-    commandType: 'plugin',
+    commandType: 'admin',
     isDependent: false,
     help: `נתוני חשיפה`,
     execute};
