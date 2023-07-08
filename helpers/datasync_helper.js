@@ -27,7 +27,7 @@ async function sync(client){
     let dataTargets = [];
     let dataSignature = await database.read("Signature", { status: "Signature" });
     if((!await database.read("Target", { status: "TargetGroup" })).trgroups){
-        dataTargets = null;
+        dataTargets = [];
     }else{
          dataTargets = (await database.read("Target", { status: "TargetGroup" })).trgroups;
     }
