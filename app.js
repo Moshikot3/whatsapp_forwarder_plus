@@ -195,7 +195,7 @@ client.on('message', async (msg) => {
 
     if (client.commands.has(command)) {
       try {
-        if (client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg) && !chat.isGroup) {
+        if (client.commands.get(command).commandType === 'admin' && !await users.isAdmin(msg)) {
           msg.reply("Big no no");
           return false;
         }
