@@ -431,15 +431,15 @@ app.post('/button-click', async (req, res) => {
 
 app.post('/send-tr-group', async (req, res) => {
   const groupIds = req.body.groups;
-  
-  try{
-    if(database.read("Target", {status: "TargetGroup"})){
-       database.del("Target", {status: "TargetGroup"});
-    }
-    
-    await database.insert("Target", { status: "TargetGroup"}, { trgroups: groupIds });
 
-  
+  try {
+    if (database.read("Target", { status: "TargetGroup" })) {
+      database.del("Target", { status: "TargetGroup" });
+    }
+
+    await database.insert("Target", { status: "TargetGroup" }, { trgroups: groupIds });
+
+
     await datasync.sync(client);
     res.sendStatus(200);
   } catch (error) {

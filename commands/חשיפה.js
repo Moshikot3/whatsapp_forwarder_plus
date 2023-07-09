@@ -1,9 +1,8 @@
 const statistics = require('../helpers/stats_helper');
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
-//console.log(statistics.showstats(client, targetGroups));
-var msgformat = await statistics.showstats(client, targetGroups)
-await msg.reply(`${msgformat}`);
+    var msgformat = await statistics.showstats(client, targetGroups)
+    await msg.reply(`${msgformat}`);
 };
 
 module.exports = {
@@ -13,5 +12,6 @@ module.exports = {
     commandType: 'admin',
     isDependent: false,
     help: `נתוני חשיפה`,
-    execute};
+    execute
+};
 
