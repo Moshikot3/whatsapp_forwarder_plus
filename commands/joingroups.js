@@ -19,7 +19,8 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
           }
     
           await sleep.sleep()
-        }}    
+        }}   
+        msg.reply("done joining groups"); 
 };
 
 module.exports = {
