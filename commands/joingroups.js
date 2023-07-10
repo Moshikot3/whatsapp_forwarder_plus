@@ -3,9 +3,6 @@ const sleep = require('../helpers/sleep_helper');
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
     
-          if (chat.isGroup){
-            return;
-          }
     
         for(var inviteLink in configfile.GroupInvites){
             try {
