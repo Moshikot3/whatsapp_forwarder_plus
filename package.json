@@ -27,6 +27,8 @@
     "ioredis": "^5.2.4",
     "mime-types": "^2.1.32",
     "mongodb": "^4.12.1",
+    "path": "^0.12.7",
+    "path-posix": "^1.0.0",
     "qrcode": "^1.4.4",
     "socket.io": "2.3.0",
     "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
