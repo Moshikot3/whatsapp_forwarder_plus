@@ -14,6 +14,8 @@ const database = require("./helpers/db_helper");
 const datasync = require("./helpers/datasync_helper");
 const listResponse = require("./helpers/response_helper");
 const statistics = require("./helpers/stats_helper");
+const guest = require("./helpers/guest_helper");
+
 const path = require('path');
 
 const listenGroups = datasync.listenGroups
@@ -367,6 +369,13 @@ client.on('message', async (msg) => {
 
   }
 
+
+  if(!chat.isGroup){
+    await guest.SendGuestMessage(client, msg);
+  }
+
+
+
 });
 
 
@@ -374,10 +383,14 @@ client.on('message', async (msg) => {
 app.get('/', async (req, res) => {
   let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
   let signature = ''; // Initialize signature variable
+  let GuestMessage;
 
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
   const isSignature = await database.read("Signature", { status: "Signature" });
+  const isGuestMessage = await database.read("config");
+
+  
 
   if (isSourceGroup) {
     sourceGroupNaming = isSourceGroup.name;
@@ -387,10 +400,16 @@ app.get('/', async (req, res) => {
     signature = isSignature.text;
   }
 
+  if (isGuestMessage) {
+    console.log(isGuestMessage);
+    GuestMessage = isGuestMessage.guestmsg;
+  }
 
 
 
-  res.render(__dirname + "/index.html", { sourceGroupNaming, signature });
+
+
+  res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage });
 });
 
 
@@ -466,7 +485,17 @@ app.post('/signature-click', async (req, res) => {
 
   await datasync.sync(client);
   await console.log("בוצע");
-  console.log(sourceGroup);
+  res.sendStatus(200);
+});
+
+app.post('/guestmsg-click', async (req, res) => {
+  let configvalues = await database.read("config");
+  let guestmsgtext = req.body.guestmsg;
+
+  console.log(guestmsgtext);
+  await database.insert("config", { guestmsg: guestmsgtext });
+
+  await console.log("בוצע");
   res.sendStatus(200);
 });
 

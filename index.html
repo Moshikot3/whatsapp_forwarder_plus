@@ -152,6 +152,16 @@
       <button id="signatureBtn" type="button">שלח ועדכן</button>
     </div>
     <!--End Block 3-->
+    <!--Start Block 4-->
+    <div>
+      <h1>הודעת פתיחה:</h1>
+      <h3>השאר את השדה ריק על מנת לבטל הודעת פתיחה</h3>
+
+      <textarea id="guestInput" rows="10" placeholder="הכנס הודעת פתיחה כאן"><%= GuestMessage %></textarea>
+      <br><br>
+      <button id="guestBtn" type="button">שלח ועדכן</button>
+    </div>
+    <!--End Block 4-->
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
@@ -285,6 +295,38 @@
           },
           body: JSON.stringify({
             signature: signature,
+
+          })
+        })
+          .then(response => {
+            if (response.ok) {
+              console.log('Button clicked!');
+              setTimeout(function () {
+                alert('בוצע רענון נתונים');
+                location.reload(true);
+              }, 1000);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+
+
+
+      const guestmsgtext = document.getElementById('guestInput');
+      const guestmsgbtn = document.getElementById('guestBtn');
+      guestmsgbtn.addEventListener('click', () => {
+        const guestMsg = guestmsgtext.value;
+        console.log(guestMsg);
+
+        fetch('/guestmsg-click', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            guestmsg: guestMsg,
 
           })
         })
