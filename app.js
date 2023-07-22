@@ -270,12 +270,6 @@ client.on('message', async (msg) => {
       console.log("srcgroup wrote in db");
     }
     catch { console.log("Error saving srcmsgid to MongoDB"); }
-
-
-    // if(await database.add("Messages", { srcmsgid: msg.id }, { msgid: msg.id._serialized })){
-    //   console.log("New message writted to MongoDB");
-    // }
-
     // Remove signature symbol "~" from msg.body
     if (msg.body.endsWith("~")) {
       msg.body = msg.body.slice(0, -1); // Remove last character (~)
@@ -370,7 +364,7 @@ client.on('message', async (msg) => {
   }
 
 
-  if(!chat.isGroup){
+  if(!chat.isGroup && !msg.body.startsWith("!")){
     await guest.SendGuestMessage(client, msg);
   }
 
@@ -492,8 +486,11 @@ app.post('/guestmsg-click', async (req, res) => {
   let configvalues = await database.read("config");
   let guestmsgtext = req.body.guestmsg;
 
-  console.log(guestmsgtext);
-  await database.insert("config", { guestmsg: guestmsgtext });
+  if(!(await database.removeFields("config", {status: "config"}, 'guestmsg'))){
+    await database.addToDocument("config", {}, {guestmsg: guestmsgtext, status: "config"});
+  }else{
+    await database.addToDocument("config", {}, {guestmsg: guestmsgtext});
+  }
 
   await console.log("בוצע");
   res.sendStatus(200);

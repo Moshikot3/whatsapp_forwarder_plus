@@ -136,6 +136,70 @@ async function remove(colllection, id, removal) {
 }
 
 
+async function removeFields(collection, query, fieldsToRemove) {
+  try {
+    var { conn, coll } = await database(collection);
+    
+    // Fetch the document based on the provided query
+    const document = await coll.findOne(query);
+    
+    if (!document) {
+      console.log("Document not found");
+      return false;
+    }
+
+    let update = { $unset: {} };
+
+    // If fieldsToRemove is an array, remove all the fields mentioned in the array.
+    if (Array.isArray(fieldsToRemove)) {
+      fieldsToRemove.forEach((field) => {
+        update.$unset[field] = 1;
+      });
+    } else {
+      // If fieldsToRemove is a single field, remove only that field.
+      update.$unset[fieldsToRemove] = 1;
+    }
+
+    const options = { upsert: true };
+    await coll.updateOne(query, update, options);
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
+
+
+async function addToDocument(collection, query, dataToAdd) {
+  try {
+    var { conn, coll } = await database(collection);
+
+    // Check if the document exists
+    const existingDocument = await coll.findOne(query);
+
+    // If the document exists, update it with the new data
+    if (existingDocument) {
+      const update = { $set: dataToAdd };
+      await coll.updateOne(query, update);
+    } else {
+      // If the document doesn't exist, insert a new one with the data
+      await coll.insertOne({ ...query, ...dataToAdd });
+    }
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
 
 module.exports = {
   insert,
@@ -145,5 +209,8 @@ module.exports = {
   remove,
   drop,
   increment,
-  getAllGroupIDs
+  getAllGroupIDs,
+  removeFields,
+  addToDocument
+  
 };
