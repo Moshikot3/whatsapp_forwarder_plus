@@ -1,0 +1,245 @@
+.add-admin-block {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    /* Display the elements one above each other */
+    display: flex;
+    direction: rtl;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.add-admin-block h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.add-admin-block input[type="text"] {
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: right;
+    margin-bottom: 15px;
+    width: 100%;
+    direction: ltr;
+    /* Left-to-right direction for phone numbers */
+}
+
+.add-admin-block button {
+    font-size: 20px;
+    padding: 12px 25px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.settings-block {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    /* Display the checkboxes one above each other */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.settings-block h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.settings-block label {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.settings-block input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.settings-block button {
+    font-size: 20px;
+    padding: 12px 25px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 20px;
+}
+
+#app {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: #666;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+#qrcode {
+    display: none;
+    margin-top: 20px;
+}
+
+h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+ul.logs {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    text-align: right;
+}
+
+ul.logs li {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+select {
+    font-size: 18px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+button {
+    font-size: 20px;
+    padding: 12px 25px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.flex-container>div {
+    flex-basis: calc(33.33% - 20px);
+    margin-bottom: 20px;
+    /* Adjusted the spacing between blocks */
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.flex-container>div:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Make textarea non-resizable */
+textarea {
+    resize: none;
+    font-family: "Arial", sans-serif;
+    /* English font */
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    direction: rtl;
+    /* Right-to-left direction for Hebrew text */
+}
+
+/* Adjust button sizes for Block 3 and Block 4 */
+.flex-container>div textarea,
+.flex-container>div button {
+    width: 100%;
+}
+
+@media screen and (max-width: 1024px) {
+    .flex-container>div {
+        flex-basis: calc(50% - 20px);
+    }
+
+    .flex-container {
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .flex-container>div {
+        flex-basis: 100%;
+    }
+
+    #app {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    p {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    select {
+        font-size: 16px;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        font-size: 18px;
+        padding: 10px 20px;
+    }
+}
