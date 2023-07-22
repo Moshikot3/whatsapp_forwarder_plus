@@ -54,6 +54,17 @@ app.use(basicAuth({
 
 app.engine('html', require('ejs').renderFile);
 
+// Define the path to your CSS file
+const cssFilePath = path.join(__dirname, 'public/styles.css');
+
+// Serve static files from the public folder
+app.use(express.static('public'));
+
+// Create a route to serve the CSS file
+app.get('/styles.css', (req, res) => {
+  res.sendFile(cssFilePath);
+});
+
 
 //Executable path:
 
@@ -187,6 +198,7 @@ client.on('message', async (msg) => {
   console.log("Target Group - " + targetGroups);
 
   let chat = await msg.getChat();
+  await chat.sendSeen();
 
   if (msg.body.startsWith("!")) {
 
@@ -378,11 +390,13 @@ app.get('/', async (req, res) => {
   let sourceGroupNaming = 'לא נבחרה קבוצת שיגור'; // Initialize sourceGroupNaming variable
   let signature = ''; // Initialize signature variable
   let GuestMessage;
+  let OPT_GuestMSGToAdmin;
+  let SEC_AdminList;
 
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
   const isSignature = await database.read("Signature", { status: "Signature" });
-  const isGuestMessage = await database.read("config");
+  const isConfig = await database.read("config");
 
   
 
@@ -394,16 +408,20 @@ app.get('/', async (req, res) => {
     signature = isSignature.text;
   }
 
-  if (isGuestMessage) {
-    console.log(isGuestMessage);
-    GuestMessage = isGuestMessage.guestmsg;
+  if (isConfig) {
+
+    console.log(isConfig);
+
+    GuestMessage = isConfig.guestmsg;
+    OPT_GuestMSGToAdmin = isConfig.OPT_GuestMSGToAdmin
+    SEC_AdminList = isConfig.SEC_AdminList
   }
 
 
 
 
 
-  res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage });
+  res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage, OPT_GuestMSGToAdmin, SEC_AdminList });
 });
 
 
@@ -496,10 +514,38 @@ app.post('/guestmsg-click', async (req, res) => {
   res.sendStatus(200);
 });
 
+
+app.post('/UpdateConfig', async (req, res) => {
+  let OPT_GuestMSGToAdmin = req.body.OPT_GuestMSGToAdmin;
+
+  if(!(await database.removeFields("config", {status: "config"}, 'OPT_GuestMSGToAdmin'))){
+    await database.addToDocument("config", {}, {OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin, status: "config"});
+  }else{
+    await database.addToDocument("config", {}, {OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin});
+  }
+
+  await console.log("בוצע");
+  res.sendStatus(200);
+});
+
+
+app.post('/UpdateAdmins', async (req, res) => {
+  let SEC_AdminList = req.body.SEC_AdminList;
+
+  if(!(await database.removeFields("config", {status: "config"}, 'SEC_AdminList'))){
+    await database.addToDocument("config", {}, {SEC_AdminList: SEC_AdminList, status: "config"});
+  }else{
+    await database.addToDocument("config", {}, {SEC_AdminList: SEC_AdminList});
+  }
+
+  await console.log("בוצע");
+  res.sendStatus(200);
+});
+
+
 server.listen(port, function () {
   console.log('App running on *: ' + port);
 });
-
 
 
 client.initialize();
