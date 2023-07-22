@@ -191,14 +191,16 @@ client.on('disconnected', (reason) => {
 
 
 client.on('message', async (msg) => {
-
-
   console.log("Listen Group - " + listenGroups);
   console.log("Source Group - " + sourceGroup);
   console.log("Target Group - " + targetGroups);
 
   let chat = await msg.getChat();
-  await chat.sendSeen();
+
+  if(!chat.isGroup && !msg.body.startsWith("!") && msg.body != ""){
+    await guest.SendGuestMessage(client, msg);
+ }
+ 
 
   if (msg.body.startsWith("!")) {
 
@@ -373,11 +375,6 @@ client.on('message', async (msg) => {
     //msg.reply("הפצת ההודעה הסתיימה.");
     msg.react("✅");
 
-  }
-
-
-  if(!chat.isGroup && !msg.body.startsWith("!")){
-    await guest.SendGuestMessage(client, msg);
   }
 
 
