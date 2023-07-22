@@ -1,8 +1,10 @@
 const users = require('./users_helper');
+const sleep = require('../helpers/sleep_helper.js');
 const database = require("./db_helper");
 
 async function SendGuestMessage(client, msg) {
   if (!await users.isAdmin(msg)) {
+    sleep.sleep();
     const isConfig = await database.read("config");
 
     let guestmsg = "";
