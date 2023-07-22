@@ -28,6 +28,7 @@ async function SendGuestMessage(client, msg) {
       let guestContact = await msg.getContact();
       const adminList = isConfig.SEC_AdminList.split(","); // Parse the admin numbers into an array
       for (const admin of adminList) {
+        sleep.sleep();
         const adminNumber = `972${Number(admin).toString()}@c.us`; // Convert admin number to WhatsApp format
         await msg.forward(adminNumber); // Forward the guest message to each admin
         await client.sendMessage(adminNumber, guestContact); // Send the contact info to each admin
