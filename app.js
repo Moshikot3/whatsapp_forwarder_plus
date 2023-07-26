@@ -15,6 +15,8 @@ const datasync = require("./helpers/datasync_helper");
 const listResponse = require("./helpers/response_helper");
 const statistics = require("./helpers/stats_helper");
 const guest = require("./helpers/guest_helper");
+const telegram = require("./helpers/telegram_helper");
+
 
 const path = require('path');
 
@@ -82,7 +84,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: true
+    headless: false
   }
 });
 
@@ -293,7 +295,6 @@ client.on('message', async (msg) => {
         var signaturetxt = "\n\n" + (await database.read("Signature", { status: "Signature" })).text;
       }
       catch {
-        await msg.react("❌");
         console.log("Error pulling signature from MongoDB");
         var signaturetxt = ""
       }
@@ -364,6 +365,8 @@ client.on('message', async (msg) => {
       trgroupsid.push(targetGroups[0][Group]);
 
     }
+
+    telegram.ForwardTelegram(msg);
 
 
     //saving messages targetgroups
