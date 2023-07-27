@@ -337,7 +337,7 @@ client.on('message', async (msg) => {
         options.sendAudioAsVoice = true;
         trmsg = await client.sendMessage(targetGroups[0][Group], audio, options);
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
-        console.log("Send image/video");
+        console.log("Send image/video/document");
         let attachmentData = await msg.downloadMedia();
         if (msg.body == "" || msg.body == " ") {
           options.caption = msg.body;
