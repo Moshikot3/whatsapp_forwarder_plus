@@ -41,6 +41,24 @@ function sleep() {
 }
 
 
+function addRandomExtraSpace(text) {
+  if (!text || text.trim() === '') {
+    // If the input text is empty or contains no words, return the original input
+    return text;
+  }
+
+  const words = text.split(' ');
+  if (words.length <= 1) {
+    // If the input text has only one word, return the original input
+    return text;
+  }
+
+  const randomIndex = Math.floor(Math.random() * (words.length - 1)) + 1; // Choose a random word index, excluding the first word
+  words[randomIndex] += ' '; // Add a space to the chosen word
+  return words.join(' ');
+}
+
+
 app.use(express.json());
 app.use(express.urlencoded({
   extended: true
@@ -245,7 +263,7 @@ client.on('message', async (msg) => {
 
 
   if (listenGroups.includes(msg.from) || (msg.from == sourceGroup && msg.body != '!מחק')) {
-
+    
     let author = msg.author;
     //console.log(msg);
     let options = {};
@@ -302,7 +320,8 @@ client.on('message', async (msg) => {
     let trgroupsmsgid = [];
     let trgroupsid = [];
 
-    for (var Group in targetGroups[0]) {
+    for (const Group in targetGroups[0]) {
+      const modifiedText = addRandomExtraSpace(msg.body);
       let trmsg = undefined;
       let extras = null;
 
@@ -330,7 +349,7 @@ client.on('message', async (msg) => {
 
       if (msg.type == 'chat') {
         console.log("Send message");
-        trmsg = await client.sendMessage(targetGroups[0][Group], msg.body + signaturetxt, options);
+        trmsg = await client.sendMessage(targetGroups[0][Group], modifiedText + signaturetxt, options);
       } else if (msg.type == 'ptt') {
         console.log("Send audio");
         let audio = await msg.downloadMedia();
@@ -339,11 +358,11 @@ client.on('message', async (msg) => {
       } else if (msg.type == 'image' || msg.type == 'video' || msg.type == 'document') {
         console.log("Send image/video/document");
         let attachmentData = await msg.downloadMedia();
-        if (msg.body == "" || msg.body == " ") {
-          options.caption = msg.body;
+        if (modifiedText == "" || modifiedText == " ") {
+          options.caption = modifiedText;
           trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
         } else {
-          options.caption = msg.body + signaturetxt;
+          options.caption = modifiedText + signaturetxt;
           trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
         }
       } else if (msg.type == 'sticker') {
