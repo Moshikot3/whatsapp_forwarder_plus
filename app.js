@@ -102,7 +102,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: false
+    headless: true
   }
 });
 
