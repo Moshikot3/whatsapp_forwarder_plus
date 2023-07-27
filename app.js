@@ -15,7 +15,7 @@ const datasync = require("./helpers/datasync_helper");
 const listResponse = require("./helpers/response_helper");
 const statistics = require("./helpers/stats_helper");
 const guest = require("./helpers/guest_helper");
-const telegram = require("./helpers/telegram_helper");
+//const telegram = require("./helpers/telegram_helper");
 
 
 const path = require('path');
@@ -366,7 +366,7 @@ client.on('message', async (msg) => {
 
     }
 
-    telegram.ForwardTelegram(msg);
+    //telegram.ForwardTelegram(msg);
 
 
     //saving messages targetgroups
