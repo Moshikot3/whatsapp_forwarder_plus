@@ -12,72 +12,10 @@
     <p>גרסת נסיון</p>
     <img src="https://tmv.co.il/WAFP.png" alt=""><br>
     <img src="" alt="QR Code יוצג כאשר זמין, במידה והנך מחובר כבר יש להתעלם מהודעה זו." id="qrcode">
-    <h3>Logs:</h3>
+    <h3 style="color: red; text-decoration: underline;">תוקף הרישוי פג, יש לפנות למפתח</h3>
     <ul class="logs"></ul>
   </div>
 
-  <div class="flex-container">
-    <!--start Block 1--->
-    <div>
-      <h1>קבוצת שיגור:</h1>
-      <p><b>קבוצה נוכחית:</b> <%= sourceGroupNaming %></p>
-      <select id="groupSelect">
-        <option value="">בחר קבוצת שיגור</option>
-      </select>
-      <button id="SrcGrp" type="button">שלח ועדכן</button>
-    </div>
-    <!--stop Block 1-->
-    <!--Start Block 2-->
-    <div>
-      <h1>קבוצות יעד:</h1>
-      <% if (sourceGroupNaming !=='' ) { %>
-      <% } %>
-      <ul id="groupList"></ul>
-      <button id="SendBtn" type="button">שלח ועדכן</button>
-    </div>
-    <!--End Block 2-->
-    <!--Start Block 3-->
-    <div class="flex-container">
-      <h1>חתימה:</h1>
-      <h3>הידעת? שלח את הסימן ~ בסוף הודעה כדי לא לשלוח את החתימה</h3>
-      <textarea id="signatureInput" rows="10" placeholder="הכנס חתימה כאן."><%= signature %></textarea>
-      <button id="signatureBtn" type="button">שלח ועדכן</button>
-    </div>
-    <!--End Block 3-->
-    <!--Start Block 4-->
-    <div class="flex-container">
-      <h1>הודעת פתיחה:</h1>
-      <h3>השאר את השדה ריק על מנת לבטל הודעת פתיחה</h3>
-      <textarea id="guestInput" rows="10" placeholder="הכנס הודעת פתיחה כאן"><%= GuestMessage %></textarea>
-      <button id="guestBtn" type="button">שלח ועדכן</button>
-    </div>
-    <!--End Block 4-->
-
-    <!--Start Block 5 - Settings Block -->
-    <div class="settings-block">
-      <h1>הגדרות:</h1>
-      <label>
-        <input type="checkbox" id="GuestmsgToAdmin" <% if (OPT_GuestMSGToAdmin) { %> checked <% } %>> שלח הודעות אורחים למנהל</input>
-      </label>
-      <label>
-        <input type="checkbox" disabled> העברת הודעות לטלגרם (יש להגדיר טוקן)</input>
-      </label>
-      <label>
-        <input type="checkbox" disabled> הגדרה 2</input>
-      </label>
-      <!-- Add more checkboxes here as needed -->
-      <button id="settingsBtn" type="button">שמור הגדרות</button>
-    </div>
-    <!-- End Block 5 - Settings Block -->
-    <!-- Start Block 6 - Add Admin Block -->
-  <div class="add-admin-block">
-    <h1>הגדר מנהל:</h1>
-    <h3>ניתן להפריד בין מנהלים באמצעות , (פסיק)</h3>
-    <input type="text" id="adminInput" placeholder="הכנס מספר טלפון של המנהל" value="<%= SEC_AdminList %>"  dir="rtl"></input>
-    <button id="addAdminBtn" type="button">עדכן</button>
-  </div>
-  <!-- End Block 6 - Add Admin Block -->
-  </div>
 
 
 
@@ -91,10 +29,10 @@
         $('.logs').append($('<li>').text(msg));
       });
 
-      socket.on('qr', function (src) {
-        $('#qrcode').attr('src', src);
-        $('#qrcode').show();
-      });
+      // socket.on('qr', function (src) {
+      //   $('#qrcode').attr('src', src);
+      //   $('#qrcode').show();
+      // });
 
       socket.on('ready', function (data) {
 		setTimeout(function () {
