@@ -127,6 +127,8 @@ io.on('connection', function (socket) {
   socket.emit('message', 'חדשות הבזק, גרסת בדיקה.');
 
 
+
+
   client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
     qrcode.toDataURL(qr, (err, url) => {
@@ -135,7 +137,18 @@ io.on('connection', function (socket) {
     });
   });
 
+  setInterval(async () => {
+    if (client.pupPage) { // Check if the Puppeteer page is available in the client object
+      const screenshot = await client.pupPage.screenshot({ encoding: 'base64' });
+      socket.emit('screenshot', screenshot);
+    }
+  }, 2000);
+
 });
+
+
+
+
 
 client.on('ready', async () => {
   await datasync.sync(client);
@@ -186,6 +199,10 @@ client.on('ready', async () => {
     console.log('Client is ready again!');
   });
 });
+
+
+
+
 
 
 client.on('authenticated', () => {
@@ -475,7 +492,10 @@ app.post('/button-click', async (req, res) => {
 });
 
 
+app.get('/stream', async (req, res) => {
 
+  res.render(__dirname + "/stream.html");
+});
 
 
 
