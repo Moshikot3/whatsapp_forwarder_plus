@@ -106,11 +106,10 @@ const client = new Client({
     args:[
       '--no-sandbox', // Add this option to fix sandbox-related issues in some environments
       '--disable-setuid-sandbox', // Add this option to fix sandbox-related issues in some environments
-      '--font-render-hinting=none', // Disable font hinting to fix font rendering issues
-      `--font-family=HebrewFont`, // Specify the custom font family
 
     ],
     defaultViewport: null, // Set this to null to have full page screenshots
+    font: 'Arial, "Noto Sans Hebrew", "Noto Sans", sans-serif', // Add Hebrew fonts to the list
   }
 });
 
