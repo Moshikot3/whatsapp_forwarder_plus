@@ -102,7 +102,15 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: true
+    headless: true,
+    args:[
+      '--no-sandbox', // Add this option to fix sandbox-related issues in some environments
+      '--disable-setuid-sandbox', // Add this option to fix sandbox-related issues in some environments
+      '--font-render-hinting=none', // Disable font hinting to fix font rendering issues
+      `--font-family=HebrewFont`, // Specify the custom font family
+
+    ],
+    defaultViewport: null, // Set this to null to have full page screenshots
   }
 });
 
