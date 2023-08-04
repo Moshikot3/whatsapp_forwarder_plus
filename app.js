@@ -31,13 +31,25 @@ const fs = require('fs');
 const users = require('./helpers/users_helper');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
 
-function sleep() {
-  return new Promise((resolve) => {
-    let timeInMs = (Math.random() * (3000 - 1000 + 1)) + 2200;
-    setTimeout(resolve, timeInMs);
+function getRandomDelay() {
+  return Math.floor(Math.random() * (3200 - 1200 + 1)) + 1200;
+}
 
-    console.log(timeInMs)
-  });
+function sleep(delay) {
+  if (typeof delay === 'number') {
+    // Sleep for the specified duration
+    return new Promise((resolve) => {
+      setTimeout(resolve, delay);
+      console.log(delay);
+    });
+  } else {
+    // Sleep for a random duration
+    return new Promise((resolve) => {
+      const timeInMs = getRandomDelay();
+      setTimeout(resolve, timeInMs);
+      console.log(timeInMs);
+    });
+  }
 }
 
 
@@ -345,8 +357,15 @@ client.on('message', async (msg) => {
     let trgroupsid = [];
 
     for (const Group in targetGroups[0]) {
+      
       const modifiedText = addRandomExtraSpace(msg.body);
       let trmsg = undefined;
+      const targetchat = await client.getChatById(targetGroups[0][Group]);
+      //console.log(targetchat);
+      await sleep(1005);
+      targetchat.sendSeen();
+      targetchat.sendStateTyping();
+      await sleep();
       let extras = null;
 
       //quote messages handeling
@@ -401,11 +420,12 @@ client.on('message', async (msg) => {
         options.stickerName = "חדשות הבזק";
         trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
       }
-      await sleep();
       console.log(`forward message to ${targetGroups[0][Group]}`);
 
       trgroupsmsgid.push(trmsg._data.id.id);
       trgroupsid.push(targetGroups[0][Group]);
+
+      targetchat.clearState();
 
     }
 
@@ -499,10 +519,10 @@ app.post('/button-click', async (req, res) => {
 });
 
 
-app.get('/stream', async (req, res) => {
+// app.get('/stream', async (req, res) => {
 
-  res.render(__dirname + "/stream.html");
-});
+//   res.render(__dirname + "/stream.html");
+// });
 
 
 
