@@ -32,7 +32,7 @@ const users = require('./helpers/users_helper');
 const worker = `.wwebjs_auth/session/Default/Service Worker`;
 
 function getRandomDelay() {
-  return Math.floor(Math.random() * (3200 - 1200 + 1)) + 1200;
+  return Math.floor(Math.random() * (3000 - 1000 + 1)) + 2200;
 }
 
 function sleep(delay) {
@@ -362,7 +362,7 @@ client.on('message', async (msg) => {
       let trmsg = undefined;
       const targetchat = await client.getChatById(targetGroups[0][Group]);
       //console.log(targetchat);
-      await sleep(1005);
+      await sleep(400);
       targetchat.sendSeen();
       targetchat.sendStateTyping();
       await sleep();
