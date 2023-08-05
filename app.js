@@ -24,7 +24,7 @@ const path = require('path');
 const listenGroups = datasync.listenGroups
 const sourceGroup = datasync.sourceGroup
 const targetGroups = datasync.targetGroups
-const signaturetxt = datasync.signaturetxt
+//const signaturetxt = datasync.signaturetxt
 
 //Crapbot mitigation
 const fs = require('fs');
@@ -236,6 +236,7 @@ client.on('message', async (msg) => {
   console.log('Message from: ', msg.from, " - ", msg.body);
 
   await wafpMessage.handleMessage(targetGroups, sourceGroup, client, msg);
+
 });
 
 app.get('/', async (req, res) => {
@@ -248,7 +249,7 @@ app.get('/', async (req, res) => {
   // Check if the database query condition is true
   const isSourceGroup = await database.read("Source", { status: "SourceGroup" });
   const isSignature = await database.read("Signature", { status: "Signature" });
-  const isConfig = await database.read("config"); A
+  const isConfig = await database.read("config");
 
 
 
@@ -268,10 +269,6 @@ app.get('/', async (req, res) => {
     OPT_GuestMSGToAdmin = isConfig.OPT_GuestMSGToAdmin
     SEC_AdminList = isConfig.SEC_AdminList
   }
-
-
-
-
 
   res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage, OPT_GuestMSGToAdmin, SEC_AdminList });
 });

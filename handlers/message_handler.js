@@ -140,15 +140,17 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
+        console.log(attachmentData);
         let buffer = Buffer.from(attachmentData.data);
         if (buffer.length / 1e+6 > 5) {
           console.log("אאאאיפה אחי כבד");
           return;
         }
         options.sendMediaAsSticker = true;
-        options.stickerAuthor = "חדשות הבזק";
-        options.stickerName = "חדשות הבזק";
+        //options.stickerAuthor = "חדשות הבזק";
+        //options.stickerName = "חדשות הבזק";
         trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
+        console.log(trmsg);
       }
       console.log(`forward message to ${targetGroups[0][Group]}`);
 
