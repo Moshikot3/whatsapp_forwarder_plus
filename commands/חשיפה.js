@@ -1,7 +1,11 @@
 const statistics = require('../helpers/stats_helper');
+const database = require('../helpers/db_helper');
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
     var msgformat = await statistics.showstats(client, targetGroups)
+    
+
+
     await msg.reply(`${msgformat}`);
 };
 
