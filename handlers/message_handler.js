@@ -132,13 +132,13 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
         try{
         trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
         }catch{
+          targetchat.clearState();
           msg.react("❌");
           console.log("Error sending video, - Not supported");
           return;
         }
       } else if (msg.type == 'sticker') {
         let attachmentData = await msg.downloadMedia();
-        console.log(attachmentData);
         let buffer = Buffer.from(attachmentData.data);
         if (buffer.length / 1e+6 > 5) {
           console.log("אאאאיפה אחי כבד");

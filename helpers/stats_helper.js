@@ -10,6 +10,8 @@ async function showstats(client, targetGroups) {
     let alltargetgroups = (await database.read("Target", { status: "TargetGroup" })).trgroups;
     console.log(alltargetgroups.length);
     console.log(allmessagesnum);
+    // const result = await database.countTrgtmsgID("messages");
+    // console.log(result);
 
     for (var group in targetGroups[0]) {
 
@@ -27,6 +29,7 @@ async function showstats(client, targetGroups) {
     msgformat += `סה"כ הודעות שטיפלתי מקבוצות השיגור:  *${allmessagesnum}*.`;
     msgformat += "\n";
     msgformat += `כמות משוערת של הודעות שנשלחו דרכי: ${allmessagesnum*alltargetgroups.length} (כמות הודעות שיגור X מספר קבוצות)`;
+
     
 
     return msgformat;

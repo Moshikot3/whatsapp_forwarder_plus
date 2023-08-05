@@ -188,6 +188,38 @@ async function countDocuments(collection) {
   }
 }
 
+// async function countTrgtmsgID(collection) {
+  
+//   try {
+//     var { conn, coll } = await database(collection);
+
+//     // Fetch the first few documents to check the structure
+//     const documents = await coll.find().limit(5).toArray();
+//     console.log("Sample documents:", documents);
+
+//     // Aggregate pipeline to count the number of elements in the trgtmsgID array for each document
+//     const pipeline = [
+//       {
+//         $project: {
+//           _id: 1,
+//           trgtmsgIDCount: { $size: { $ifNull: ["$trgtmsgID", []] } }
+//         }
+//       }
+//     ];
+
+//     const result = await coll.aggregate(pipeline).toArray();
+
+//     return result;
+//   } catch (error) {
+//     console.error('Error:', error);
+//     throw new Error('Failed to count trgtmsgID array for each document');
+//   } finally {
+//     if (conn) {
+//       await conn.close();
+//     }
+//   }
+// }
+
 async function addToDocument(collection, query, dataToAdd) {
   try {
     var { conn, coll } = await database(collection);
