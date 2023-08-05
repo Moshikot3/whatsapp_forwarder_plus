@@ -23,6 +23,8 @@ async function showstats(client, targetGroups) {
     msgformat += "*סה״כ משתמשים:* " + gtotalcount;
     msgformat += "\n\n";
     msgformat += `סה"כ הודעות שטיפלתי מקבוצות השיגור:  *${allmessagesnum}*.`;
+    msgformat += "\n";
+    msgformat += `כמות משוערכת של הודעות שנשלחו דרכי: ${allmessagesnum*14}`;
     
 
     return msgformat;
