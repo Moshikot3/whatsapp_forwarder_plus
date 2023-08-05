@@ -1,8 +1,6 @@
 const database = require("../helpers/db_helper");
 const sleep = require("../helpers/sleep_helper");
 
-
-
 function addRandomExtraSpace(text) {
     if (!text || text.trim() === '') {
       // If the input text is empty or contains no words, return the original input

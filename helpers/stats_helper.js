@@ -1,3 +1,4 @@
+const database = require("./db_helper");
 var msgformat = "";
 
 async function showstats(client, targetGroups) {
@@ -5,6 +6,8 @@ async function showstats(client, targetGroups) {
     var gcount = "*קבוצה - מס׳ משתמשים*\n";
     let gtotalcount = 0;
     let chat = null;
+    let allmessagesnum = await database.countDocuments("messages");
+    console.log(allmessagesnum);
 
     for (var group in targetGroups[0]) {
 
@@ -12,11 +15,14 @@ async function showstats(client, targetGroups) {
         var txtgcount = `${chat.groupMetadata.subject} - ${chat.groupMetadata.participants.length}\n`;
         gcount += txtgcount;
         gtotalcount += chat.groupMetadata.participants.length
+
     }
 
 
-    msgformat += gcount
-    msgformat += "*סה״כ משתמשים:* " + gtotalcount
+    msgformat += gcount;
+    msgformat += "*סה״כ משתמשים:* " + gtotalcount;
+    msgformat += "\n\n";
+    msgformat += `סה"כ הודעות שטיפלתי מקבוצות השיגור:  *${allmessagesnum}*.`;
     
 
     return msgformat;

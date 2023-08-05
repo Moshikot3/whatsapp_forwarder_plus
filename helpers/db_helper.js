@@ -173,6 +173,20 @@ async function removeFields(collection, query, fieldsToRemove) {
   }
 }
 
+async function countDocuments(collection) {
+  try {
+    var { conn, coll } = await database(collection);
+    const count = await coll.countDocuments();
+    return count;
+  } catch (error) {
+    console.error('Error:', error);
+    throw new Error('Failed to count documents');
+  } finally {
+    if (conn) {
+      await conn.close();
+    }
+  }
+}
 
 async function addToDocument(collection, query, dataToAdd) {
   try {
@@ -211,6 +225,7 @@ module.exports = {
   increment,
   getAllGroupIDs,
   removeFields,
-  addToDocument
+  addToDocument,
+  countDocuments
   
 };
