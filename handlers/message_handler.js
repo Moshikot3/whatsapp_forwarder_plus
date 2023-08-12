@@ -162,7 +162,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
     }
 
     if(isConfig.OPT_forwardTelegram){
-      telegram.ForwardTelegram(msg, signaturetxt, isConfig);
+      telegram.ForwardTelegram(msg, isConfig);
     }
 
     //saving messages targetgroups

@@ -1,9 +1,9 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 
-async function ForwardTelegram(msg, signaturetxt, isConfig) {
+async function ForwardTelegram(msg, isConfig) {
 
-
+    let signaturetxt = ""
     const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
     const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
     const OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID
@@ -73,12 +73,14 @@ async function ForwardTelegram(msg, signaturetxt, isConfig) {
 
 
         }
+        console.log("Message forwarded to Telegram");
     }catch{
         await msg.react("⚠️");
         await msg.reply("⚠️שים לב, ההודעה לא הועברה לטלגרם.⚠️\nעל מנת להפסיק הודעה זו יש לכבות העברה לטלגרם באמצעות הפורטל\n\nאם הנך מנסה להעביר הודעות לטלגרם, שים לב שהגדרת את כל ההגדרות כשורה.\nבמידה והבעיה עדיין נמשכת, יש לפנות למפתח.");
+        console.log("MEssage did not forwarded to Telegram");
     }
 
-    console.log("Message forwarded to Telegram");
+
 };
 
 module.exports = { ForwardTelegram };
