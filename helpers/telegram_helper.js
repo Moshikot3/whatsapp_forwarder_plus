@@ -3,10 +3,13 @@ const TelegramBot = require('node-telegram-bot-api');
 
 async function ForwardTelegram(msg, isConfig) {
 
-    let signaturetxt = ""
+    //const regex = /\*([^\s*]+)\*/g;
+    let modifiedText = msg.body
+    //.replace(regex, '**$1**');
+    let signaturetxt = "";
     const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
     const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
-    const OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID
+    const OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID;
     process.env.NTBA_FIX_319 = 1;
     process.env.NTBA_FIX_350 = 0;
     //console.log(msg);
@@ -14,19 +17,23 @@ async function ForwardTelegram(msg, isConfig) {
     try{
         switch (msg.type) {
             case "chat":
-                await telegram.sendMessage(OPT_TelegramChannelChatID, msg.body + signaturetxt);
+                var options = {
+                    parse_mode: 'Markdown'
+                };
+                await telegram.sendMessage(OPT_TelegramChannelChatID, modifiedText + signaturetxt, options);
                 break;
             case "image":
 
 
                 var attachmentData = await msg.downloadMedia();
                 var options = {
+                    parse_mode: 'Markdown',
                     contentType: attachmentData.mimetype
                 };
-                if (msg.body == "" || msg.body == " ") {
-                    options.caption = msg.body;
+                if (modifiedText == "" || modifiedText == " ") {
+                    options.caption = modifiedText;
                 } else {
-                    options.caption = msg.body + signaturetxt;
+                    options.caption = modifiedText + signaturetxt;
                 }
 
                 await telegram.sendPhoto(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data, 'base64'), options);
@@ -35,12 +42,13 @@ async function ForwardTelegram(msg, isConfig) {
                 var attachmentData = await msg.downloadMedia();
                 var options = {
                     //need to fix this
+                    parse_mode: 'Markdown',
                     contentType: attachmentData.mimetype
                 };
-                if (msg.body == "" || msg.body == " ") {
-                    options.caption = msg.body;
+                if (modifiedText == "" || modifiedText == " ") {
+                    options.caption = modifiedText;
                 } else {
-                    options.caption = msg.body + signaturetxt;
+                    options.caption = modifiedText + signaturetxt;
                 }
 
                 await telegram.sendVideo(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data, 'base64'), options);
@@ -54,15 +62,16 @@ async function ForwardTelegram(msg, isConfig) {
                 break;
             case "document":
                 var attachmentData = await msg.downloadMedia();
-                console.log(msg.body);
+                console.log(modifiedText);
                 var options = {
+                    parse_mode: 'Markdown',
                     filename: attachmentData.filename,
                     contentType: attachmentData.mimetype,
                 };
-                if (msg.body == "" || msg.body == " ") {
-                    options.caption = msg.body;
+                if (modifiedText == "" || modifiedText == " ") {
+                    options.caption = modifiedText;
                 } else {
-                    options.caption = msg.body + signaturetxt;
+                    options.caption = modifiedText + signaturetxt;
                 }
                 //console.log(attachmentData);
                 await telegram.sendDocument(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data , 'base64'), {caption: msg}, options);
