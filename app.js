@@ -244,6 +244,10 @@ app.get('/', async (req, res) => {
   let signature = ''; // Initialize signature variable
   let GuestMessage;
   let OPT_GuestMSGToAdmin;
+  let OPT_forwardTelegram;
+  let OPT_TelegramBotToken;
+  let OPT_TelegramChannelChatID;
+  let OPT_TelegramAdminChatID;
   let SEC_AdminList;
 
   // Check if the database query condition is true
@@ -267,10 +271,14 @@ app.get('/', async (req, res) => {
 
     GuestMessage = isConfig.guestmsg;
     OPT_GuestMSGToAdmin = isConfig.OPT_GuestMSGToAdmin
+    OPT_forwardTelegram = isConfig.OPT_forwardTelegram;
+    OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
+    OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID;
+    OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
     SEC_AdminList = isConfig.SEC_AdminList
   }
 
-  res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage, OPT_GuestMSGToAdmin, SEC_AdminList });
+  res.render(__dirname + "/index.html", { sourceGroupNaming, signature, GuestMessage, OPT_GuestMSGToAdmin, OPT_forwardTelegram, OPT_TelegramBotToken, OPT_TelegramChannelChatID, OPT_TelegramAdminChatID, SEC_AdminList });
 });
 
 
@@ -369,11 +377,28 @@ app.post('/guestmsg-click', async (req, res) => {
 
 app.post('/UpdateConfig', async (req, res) => {
   let OPT_GuestMSGToAdmin = req.body.OPT_GuestMSGToAdmin;
+  let OPT_forwardTelegram = req.body.OPT_forwardTelegram;
+  let OPT_TelegramBotToken = req.body.OPT_TelegramBotToken;
+  let OPT_TelegramChannelChatID = req.body.OPT_TelegramChannelChatID;
+  let OPT_TelegramAdminChatID = req.body.OPT_TelegramAdminChatID;
 
   if (!(await database.removeFields("config", { status: "config" }, 'OPT_GuestMSGToAdmin'))) {
-    await database.addToDocument("config", {}, { OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin, status: "config" });
+    await database.addToDocument("config", {}, { 
+      OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin,
+      OPT_forwardTelegram: OPT_forwardTelegram,
+      OPT_TelegramBotToken: OPT_TelegramBotToken,
+      OPT_TelegramChannelChatID: OPT_TelegramChannelChatID,
+      OPT_TelegramAdminChatID: OPT_TelegramAdminChatID,
+      status: "config" 
+    });
   } else {
-    await database.addToDocument("config", {}, { OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin });
+    await database.addToDocument("config", {}, {
+       OPT_GuestMSGToAdmin: OPT_GuestMSGToAdmin,
+       OPT_forwardTelegram: OPT_forwardTelegram,
+       OPT_TelegramBotToken: OPT_TelegramBotToken,
+       OPT_TelegramChannelChatID: OPT_TelegramChannelChatID,
+       OPT_TelegramAdminChatID: OPT_TelegramAdminChatID
+    });
   }
 
   await console.log("בוצע");

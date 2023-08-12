@@ -60,11 +60,17 @@
         <input type="checkbox" id="GuestmsgToAdmin" <% if (OPT_GuestMSGToAdmin) { %> checked <% } %>> שלח הודעות אורחים למנהל</input>
       </label>
       <label>
-        <input type="checkbox" disabled> העברת הודעות לטלגרם (יש להגדיר טוקן)</input>
+        <input type="checkbox" id="OPT_forwardTelegram" <% if (OPT_forwardTelegram) { %> checked <% } %>> העברת הודעות לטלגרם (יש להגדיר טוקן)</input>
       </label>
       <label>
-        <input type="checkbox" disabled> הגדרה 2</input>
+       <input type="text" dir="ltr" id="OPT_TelegramBotToken" value=<% if (OPT_TelegramBotToken) { %> <%= OPT_TelegramBotToken %> <% } %>>Telegram Bot Token </input>
       </label>
+      <label>
+        <input type="text" dir="ltr" id="OPT_TelegramChannelChatID" value=<% if (OPT_TelegramChannelChatID) { %> <%= OPT_TelegramChannelChatID %> <% } %>>Telegram Channel ChatID </input>
+       </label>
+       <label>
+        <input type="text" dir="ltr" id="OPT_TelegramAdminChatID" value=<% if (OPT_TelegramAdminChatID) { %> <%= OPT_TelegramAdminChatID %> <% } %>>Telegram Admin ChatID </input>
+       </label>
       <!-- Add more checkboxes here as needed -->
       <button id="settingsBtn" type="button">שמור הגדרות</button>
     </div>
@@ -78,6 +84,7 @@
   </div>
   <!-- End Block 6 - Add Admin Block -->
   </div>
+  
 
 
 
@@ -263,10 +270,14 @@
 
 
       const CB_MSGTOAdmin = document.getElementById('GuestmsgToAdmin');
-
+      const CB_forwardTelegram = document.getElementById('OPT_forwardTelegram');
+      const CB_TelegramBotToken = document.getElementById('OPT_TelegramBotToken');      
+      const CB_TelegramChannelChatID = document.getElementById('OPT_TelegramChannelChatID');
+      const CB_TelegramAdminChatID = document.getElementById('OPT_TelegramAdminChatID');
+      
       const settingsBtn = document.getElementById('settingsBtn');
       settingsBtn.addEventListener('click', () => {
-      console.log(CB_MSGTOAdmin.checked);
+
 
         fetch('/UpdateConfig', {
           method: 'POST',
@@ -275,7 +286,10 @@
           },
           body: JSON.stringify({
             OPT_GuestMSGToAdmin: CB_MSGTOAdmin.checked,
-
+            OPT_forwardTelegram: CB_forwardTelegram.checked,
+            OPT_TelegramBotToken: CB_TelegramBotToken.value,
+            OPT_TelegramChannelChatID: CB_TelegramChannelChatID.value,
+            OPT_TelegramAdminChatID: CB_TelegramAdminChatID.value
           })
         })
           .then(response => {

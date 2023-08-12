@@ -1,5 +1,6 @@
 const database = require("../helpers/db_helper");
 const sleep = require("../helpers/sleep_helper");
+const telegram = require("../helpers/telegram_helper");
 
 function addRandomExtraSpace(text) {
     if (!text || text.trim() === '') {
@@ -19,6 +20,7 @@ function addRandomExtraSpace(text) {
 }
 
 async function handleMessage(targetGroups,sourceGroup, client, msg){
+  const isConfig = await database.read("config");
 
 if (msg.from == sourceGroup && msg.body != '!מחק') {
     
@@ -159,8 +161,9 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
 
     }
 
-    //telegram.ForwardTelegram(msg);
-
+    if(isConfig.OPT_forwardTelegram){
+      telegram.ForwardTelegram(msg, signaturetxt, isConfig);
+    }
 
     //saving messages targetgroups
     try {
