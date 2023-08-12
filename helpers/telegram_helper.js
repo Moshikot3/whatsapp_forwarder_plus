@@ -1,5 +1,4 @@
 const TelegramBot = require('node-telegram-bot-api');
-const database = require("./db_helper");
 
 
 async function ForwardTelegram(msg, signaturetxt, isConfig) {
@@ -8,7 +7,6 @@ async function ForwardTelegram(msg, signaturetxt, isConfig) {
     const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
     const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
     const OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID
-    console.log(isConfig.OPT_TelegramChannelChatID);
     process.env.NTBA_FIX_319 = 1;
     process.env.NTBA_FIX_350 = 0;
     //console.log(msg);
