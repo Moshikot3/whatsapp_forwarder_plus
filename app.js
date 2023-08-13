@@ -110,12 +110,12 @@ io.on('connection', function (socket) {
     });
   });
 
-  setInterval(async () => {
-    if (client.pupPage) { // Check if the Puppeteer page is available in the client object
-      const screenshot = await client.pupPage.screenshot({ encoding: 'base64' });
-      socket.emit('screenshot', screenshot);
-    }
-  }, 2000);
+  // setInterval(async () => {
+  //   if (client.pupPage) { // Check if the Puppeteer page is available in the client object
+  //     const screenshot = await client.pupPage.screenshot({ encoding: 'base64' });
+  //     socket.emit('screenshot', screenshot);
+  //   }
+  // }, 2000);
 
 });
 
