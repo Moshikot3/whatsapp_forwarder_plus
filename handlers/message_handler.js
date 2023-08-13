@@ -82,7 +82,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
 
 
     if(isConfig.OPT_forwardTelegram){
-      await telegram.ForwardTelegram(msg, isConfig);
+      telegram.ForwardTelegram(msg, isConfig);
     }
 
     for (const Group in targetGroups[0]) {
