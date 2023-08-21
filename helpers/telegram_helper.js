@@ -1,4 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
+const database = require("./db_helper");
 
 
 async function ForwardTelegram(msg, isConfig) {
@@ -92,4 +93,25 @@ async function ForwardTelegram(msg, isConfig) {
 
 };
 
-module.exports = { ForwardTelegram };
+
+async function SendWAFPStatus (botStatus)
+{
+        const isConfig = await database.read("config");
+        
+        const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
+        const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
+        const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
+        process.env.NTBA_FIX_319 = 1;
+        process.env.NTBA_FIX_350 = 0;
+
+
+        var options = {
+            parse_mode: 'Markdown'
+        };
+        await telegram.sendMessage(OPT_TelegramAdminChatID, botStatus, options);
+
+
+
+};
+
+module.exports = { ForwardTelegram, SendWAFPStatus };

@@ -17,7 +17,7 @@ const statistics = require("./helpers/stats_helper");
 const guest = require("./helpers/guest_helper");
 
 //const listResponse = require("./helpers/response_helper");
-///const telegram = require("./helpers/telegram_helper");
+const telegram = require("./helpers/telegram_helper");
 
 
 const path = require('path');
@@ -155,33 +155,41 @@ client.on('ready', async () => {
     }
   });
 
+  telegram.SendWAFPStatus("BOT ready!");
+  console.log('BOT ready!');
 
+});
 
-  client.pupPage.on('dialog', async dialog => {
-    console.log("Refresh popup just dismissed")
-    await dialog.dismiss()
-  });
-  client.pupPage.on('error', (event) => {
-    client.destroy();
-    client.initialize();
-    console.log('Client is ready again!');
-  });
+client.on('dialog', async dialog => {
+  console.log("Refresh popup just dismissed")
+  await dialog.dismiss()
+});
+
+client.on('error', (event) => {
+  client.destroy();
+  client.initialize();
+  telegram.SendWAFPStatus("pupage error... Client is ready again!");
+  console.log('pupage error... Client is ready again!');
 });
 
 
 client.on('authenticated', () => {
+  telegram.SendWAFPStatus("WAFP Authenticated");
   console.log('WAFP Authenticated');
 });
 
 client.on('auth_failure', function () {
+  telegram.SendWAFPStatus("Erorr: Authentication failed.");
   console.error('Erorr: Authentication failed.');
 });
 
 client.on('change_state', state => {
+  telegram.SendWAFPStatus('מצב חיבור: '+ state);
   console.log('מצב חיבור: ', state);
 });
 
 client.on('disconnected', (reason) => {
+  telegram.SendWAFPStatus('Client Disconnected'+ reason);
   console.log('Client Disconnected', reason);
   client.initialize();
 });

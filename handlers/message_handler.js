@@ -80,6 +80,10 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
     let trgroupsmsgid = [];
     let trgroupsid = [];
 
+    if(isConfig.OPT_forwardTelegram){
+      telegram.ForwardTelegram(msg, isConfig);
+    }
+
     for (const Group in targetGroups[0]) {
       
       const modifiedText = addRandomExtraSpace(msg.body);
@@ -160,10 +164,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
       targetchat.clearState();
 
     }
-
-    if(isConfig.OPT_forwardTelegram){
-      telegram.ForwardTelegram(msg, isConfig);
-    }
+    
 
     //saving messages targetgroups
     try {
