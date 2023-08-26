@@ -15,6 +15,8 @@ const datasync = require("./helpers/datasync_helper");
 const wafpMessage = require("./handlers/message_handler");
 const statistics = require("./helpers/stats_helper");
 const guest = require("./helpers/guest_helper");
+const setupScheduler = require('./handlers/scheduler');
+
 
 //const listResponse = require("./helpers/response_helper");
 const telegram = require("./helpers/telegram_helper");
@@ -73,7 +75,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: true,
+    headless: false,
     args: [
       '--no-sandbox', // Add this option to fix sandbox-related issues in some environments
       '--disable-setuid-sandbox', // Add this option to fix sandbox-related issues in some environments
@@ -193,6 +195,9 @@ client.on('disconnected', (reason) => {
   console.log('Client Disconnected', reason);
   client.initialize();
 });
+
+// Set up the scheduler with arguments
+const scheduledTask = setupScheduler(client);
 
 
 client.on('message', async (msg) => {

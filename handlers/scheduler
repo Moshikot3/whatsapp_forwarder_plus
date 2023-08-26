@@ -1,0 +1,30 @@
+// scheduler.js
+const sleep = require('../helpers/sleep_helper.js');
+const cron = require('node-cron');
+
+async function setupScheduler(client, callback) {
+  // Schedule the task using the provided arguments
+  const task = cron.schedule('0 5 * * *', async () => {
+    client.getChats().then(async chats => {
+        const groups = chats.filter(chat => chat.isGroup);
+        if (!groups.length == 0) {
+          groups.forEach((group, i) => {
+            group.clearMessages(true);
+            sleep.sleep();
+          });
+        }
+      });
+
+    await client.sendMessage('972544911249@c.us',"Hello");
+    console.log('Scheduled task executed with');
+  });
+
+  // Execute the callback when the task is scheduled
+  task.on('scheduled', () => {
+    if (callback) {
+      callback(task);
+    }
+  });
+}
+
+module.exports = setupScheduler;
