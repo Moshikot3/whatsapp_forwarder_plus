@@ -4,7 +4,7 @@ const cron = require('node-cron');
 
 async function setupScheduler(client, callback) {
   // Schedule the task using the provided arguments
-  const task = cron.schedule('0 0 * * *', async () => {
+  const task = cron.schedule('0 5 * * *', async () => {
     client.getChats().then(async chats => {
         const groups = chats.filter(chat => chat.isGroup);
         if (!groups.length == 0) {
