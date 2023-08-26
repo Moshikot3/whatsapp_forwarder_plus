@@ -96,11 +96,15 @@ async function ForwardTelegram(msg, isConfig) {
 
 async function SendWAFPStatus (botStatus)
 {
+
         const isConfig = await database.read("config");
         
         const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
         const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
         const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
+        if(!OPT_TelegramAdminChatID){
+            return;
+        }
         process.env.NTBA_FIX_319 = 1;
         process.env.NTBA_FIX_350 = 0;
 
