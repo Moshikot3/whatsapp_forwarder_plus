@@ -15,7 +15,7 @@ async function setupScheduler(client, callback) {
         }
       });
 
-    await client.sendMessage('972544911249@c.us',"Hello");
+    //await client.sendMessage('972544911249@c.us',"Hello");
     console.log('Scheduled task executed with');
   });
 
