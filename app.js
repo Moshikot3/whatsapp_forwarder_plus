@@ -60,6 +60,7 @@ app.get('/styles.css', (req, res) => {
   res.sendFile(cssFilePath);
 });
 
+
 //Executable path:
 let executablePath = '';
 if (process.platform === 'linux') {
