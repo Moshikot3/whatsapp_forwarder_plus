@@ -158,7 +158,7 @@ client.on('ready', async () => {
     }
   });
 
-  telegram.SendWAFPStatus("BOT ready!");
+  telegram.SendWAFPStatus("בוט עלה בהצלחה.");
   console.log('BOT ready!');
 
 });
@@ -177,17 +177,17 @@ client.on('error', (event) => {
 
 
 client.on('authenticated', () => {
-  telegram.SendWAFPStatus("WAFP Authenticated");
+  telegram.SendWAFPStatus("הזדהות מול ווצאפ בוצעה בהצלחה.");
   console.log('WAFP Authenticated');
 });
 
 client.on('auth_failure', function () {
-  telegram.SendWAFPStatus("Erorr: Authentication failed.");
+  telegram.SendWAFPStatus("שגיאה: לא ניתן להזדהות מול ווצאפ");
   console.error('Erorr: Authentication failed.');
 });
 
 client.on('change_state', state => {
-  
+
   if(state == "CONNECTED"){
   client.destroy();
   client.initialize();
@@ -199,7 +199,7 @@ client.on('change_state', state => {
 });
 
 client.on('disconnected', (reason) => {
-  telegram.SendWAFPStatus('Client Disconnected'+ reason);
+  telegram.SendWAFPStatus("התנתקות בוצעה בהצלחה");
   console.log('Client Disconnected', reason);
   client.initialize();
 });
