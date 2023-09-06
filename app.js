@@ -187,6 +187,13 @@ client.on('auth_failure', function () {
 });
 
 client.on('change_state', state => {
+  
+  if(state == "CONNECTED"){
+  client.destroy();
+  client.initialize();
+  telegram.SendWAFPStatus('STATE = CONNECTED, An attempt was made to reconnect.');
+}
+
   telegram.SendWAFPStatus('מצב חיבור: '+ state);
   console.log('מצב חיבור: ', state);
 });
