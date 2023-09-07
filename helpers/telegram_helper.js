@@ -13,15 +13,17 @@ async function ForwardTelegram(msg, isConfig) {
     const OPT_TelegramChannelChatID = isConfig.OPT_TelegramChannelChatID;
     process.env.NTBA_FIX_319 = 1;
     process.env.NTBA_FIX_350 = 0;
+    let tlgrmsg;
     //console.log(msg);
 
     try{
         switch (msg.type) {
             case "chat":
                 var options = {
-                    parse_mode: 'Markdown'
+                    parse_mode: 'Markdown',
+                    reply_to_message_id: ''
                 };
-                await telegram.sendMessage(OPT_TelegramChannelChatID, modifiedText + signaturetxt, options);
+                tlgrmsg = await telegram.sendMessage(OPT_TelegramChannelChatID, modifiedText + signaturetxt, options);
                 break;
             case "image":
 
@@ -29,7 +31,8 @@ async function ForwardTelegram(msg, isConfig) {
                 var attachmentData = await msg.downloadMedia();
                 var options = {
                     parse_mode: 'Markdown',
-                    contentType: attachmentData.mimetype
+                    contentType: attachmentData.mimetype,
+                    reply_to_message_id: ''
                 };
                 if (modifiedText == "" || modifiedText == " ") {
                     options.caption = modifiedText;
@@ -44,7 +47,8 @@ async function ForwardTelegram(msg, isConfig) {
                 var options = {
                     //need to fix this
                     parse_mode: 'Markdown',
-                    contentType: attachmentData.mimetype
+                    contentType: attachmentData.mimetype,
+                    reply_to_message_id: ''
                 };
                 if (modifiedText == "" || modifiedText == " ") {
                     options.caption = modifiedText;
@@ -58,6 +62,7 @@ async function ForwardTelegram(msg, isConfig) {
                 var attachmentData = await msg.downloadMedia();
                 var options = {
                     contentType: attachmentData.mimetype,
+                    reply_to_message_id: ''
                 };
                 await telegram.sendSticker(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data, 'base64'), options);
                 break;
@@ -68,6 +73,7 @@ async function ForwardTelegram(msg, isConfig) {
                     parse_mode: 'Markdown',
                     filename: attachmentData.filename,
                     contentType: attachmentData.mimetype,
+                    reply_to_message_id: ''
                 };
                 if (modifiedText == "" || modifiedText == " ") {
                     options.caption = modifiedText;
@@ -75,7 +81,8 @@ async function ForwardTelegram(msg, isConfig) {
                     options.caption = modifiedText + signaturetxt;
                 }
                 //console.log(attachmentData);
-                await telegram.sendDocument(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data , 'base64'), {caption: msg}, options);
+                 await telegram.sendDocument(OPT_TelegramChannelChatID, Buffer.from(attachmentData.data , 'base64'), {caption: msg}, options);
+                
                 break;
             default:
                 break;
@@ -85,11 +92,12 @@ async function ForwardTelegram(msg, isConfig) {
         }
         console.log("Message forwarded to Telegram");
     }catch{
+         tlgrmsg = undefined;
         await msg.react("⚠️");
         await msg.reply("⚠️שים לב, ההודעה לא הועברה לטלגרם.⚠️\nעל מנת להפסיק הודעה זו יש לכבות העברה לטלגרם באמצעות הפורטל\n\nאם הנך מנסה להעביר הודעות לטלגרם, שים לב שהגדרת את כל ההגדרות כשורה.\nבמידה והבעיה עדיין נמשכת, יש לפנות למפתח.");
         console.log("MEssage did not forwarded to Telegram");
     }
-
+    
 
 };
 
