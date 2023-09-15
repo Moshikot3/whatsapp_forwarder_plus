@@ -76,7 +76,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: true,
+    headless: false,
     args: [
       '--no-sandbox', // Add this option to fix sandbox-related issues in some environments
       '--disable-setuid-sandbox', // Add this option to fix sandbox-related issues in some environments
@@ -103,7 +103,7 @@ fs.readdir("./commands", (err, files) => {
 
 
 io.on('connection', function (socket) {
-  socket.emit('message', 'חדשות הבזק, גרסת בדיקה.');
+  socket.emit('message', 'Backend Online');
 
   client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
@@ -287,8 +287,6 @@ app.get('/', async (req, res) => {
   }
 
   if (isConfig) {
-
-    console.log(isConfig);
 
     GuestMessage = isConfig.guestmsg;
     OPT_GuestMSGToAdmin = isConfig.OPT_GuestMSGToAdmin

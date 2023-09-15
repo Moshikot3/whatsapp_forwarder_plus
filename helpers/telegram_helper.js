@@ -107,21 +107,29 @@ async function SendWAFPStatus (botStatus)
 
         const isConfig = await database.read("config");
         
-        const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
-        const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
-        const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
-        if(!OPT_TelegramAdminChatID){
-            process.env.NTBA_FIX_319 = 1;
-            process.env.NTBA_FIX_350 = 0;
+        //I would like ot make sure that if there's no isConfig.OPT_TelegramBotToken the app will not crash
+
+        if (isConfig){
+
+            const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
+            const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
+            const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
+            console.log(OPT_TelegramAdminChatID);
+            if(OPT_TelegramAdminChatID){
+                process.env.NTBA_FIX_319 = 1;
+                process.env.NTBA_FIX_350 = 0;
+        
+        
+                var options = {
+                    parse_mode: 'Markdown'
+        
+                };
+                await telegram.sendMessage(OPT_TelegramAdminChatID, botStatus, options);
+            }else{
+                return;
+            }
     
-    
-            var options = {
-                parse_mode: 'Markdown'
-    
-            };
-            await telegram.sendMessage(OPT_TelegramAdminChatID, botStatus, options);
-        }else{
-            return;
+
         }
 
 
