@@ -82,23 +82,15 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
     let trgroupsid = [];
     let tlgrmsg ;
 
-    if(isConfig.OPT_forwardTelegram){
-
-      try{
-
-        tlgrmsg  = await telegram.ForwardTelegram(msg, isConfig, telquotemsg);
+    if (isConfig && isConfig.OPT_forwardTelegram) {
+      try {
+        tlgrmsg = await telegram.ForwardTelegram(msg, isConfig, telquotemsg);
         console.log("tlgrmsg");
-      
-      }catch{
-
-        
-        tlgrmsg = "";
-        tlgrmsg.message_id = "";
-        console.log("Msg Didn't sent to telegram");
+      } catch (error) {
+        tlgrmsg = { message_id: "" };
+        console.log("Msg Didn't send to telegram");
       }
-
-
-    };
+    }
 
     for (const Group in targetGroups[0]) {
       
