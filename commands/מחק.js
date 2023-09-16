@@ -13,58 +13,59 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
     if (msg.from == sourceGroup && msg.body == '!מחק') {
         await msg.react("🔄");
-        if(msg.hasQuotedMsg == false){
+        if (msg.hasQuotedMsg == false) {
             msg.reply("יש לצטט את ההודעה אשר ברצונך למחוק");
             return;
         }
         delmsgid = msg._data.quotedStanzaID;
 
-        
+
         try {
             delmsginfo = await database.read("messages", { messageid: delmsgid })
-            
+
             msg.reply("אני על זה, נא להעזר בסבלנות");
 
         } catch {
             msg.reply("הודעה לא קיימת במאגר / אין חיבור למסד נתונים מונגו.");
             msg.react("❌");
             return;
-             
-        }
-
-
-        //console.log(msg);
-        if(isConfig.OPT_TelegramBotToken && isConfig.OPT_TelegramChannelChatID && isConfig.OPT_forwardTelegram)
-        try{
-            telquotemsg = delmsginfo.tlgrmsg;
-            console.log(isConfig.OPT_TelegramChannelChatID + " " + telquotemsg);
-            await telegram.delMessage(isConfig.OPT_TelegramChannelChatID, telquotemsg);
-            
-        }catch{
 
         };
 
-        try{
-        for (let i = 0; i < delmsginfo.trgroup.length; i++) {
-            const trGroup = delmsginfo.trgroup[i];
-            const trMessageID = delmsginfo.trgtmsgID[i];
-            console.log(`The selected group is ${trGroup} with ID ${trMessageID}`);
-            console.log(trMessageID);
 
-            let chat = await client.getChatById(trGroup);
-            let chatHistory = (await chat.fetchMessages({ limit: 100 }));
-            for (const message of chatHistory) {
-                if (message._data.id.id == trMessageID) {
+        //console.log(msg);
+        if (isConfig.OPT_TelegramBotToken && isConfig.OPT_TelegramChannelChatID && isConfig.OPT_forwardTelegram)
+            if (delmsginfo.tlgrmsg) {
+                telquotemsg = delmsginfo.tlgrmsg;
 
-                    await message.delete(true);
-                }
+                console.log(isConfig.OPT_TelegramChannelChatID + " " + telquotemsg);
+                await telegram.delMessage(isConfig.OPT_TelegramChannelChatID, telquotemsg);
+            }else{
+                console.log("Could");
             }
 
-            await sleep.sleep();
+        try {
+            for (let i = 0; i < delmsginfo.trgroup.length; i++) {
+                const trGroup = delmsginfo.trgroup[i];
+                const trMessageID = delmsginfo.trgtmsgID[i];
+                console.log(`The selected group is ${trGroup} with ID ${trMessageID}`);
+                console.log(trMessageID);
+
+                let chat = await client.getChatById(trGroup);
+                let chatHistory = (await chat.fetchMessages({ limit: 100 }));
+                for (const message of chatHistory) {
+                    if (message._data.id.id == trMessageID) {
+
+                        await message.delete(true);
+                    }
+                }
+
+                await sleep.sleep();
 
 
-        }
-        }catch{
+            }
+        } catch(error) {
+            console.log(error);
             msg.reply("תקלה במחיקת הודעה - וודא כי הפצת ההודעה הסתיימה לפני מחיקה וכי אתה מצטט את *ההודעה הנכונה*, במידה והתקלה נמשכת יש לפנות למפתח.");
             await msg.react("❌");
             return;

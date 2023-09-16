@@ -97,6 +97,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
         console.log("Msg Didn't sent to telegram");
       }
 
+
     };
 
     for (const Group in targetGroups[0]) {
@@ -180,12 +181,18 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
 
     }
     
-
+    
     //saving messages targetgroups
     try {
-      await database.insert("messages", { messageid: msg.id.id }, { tlgrmsg: tlgrmsg.message_id, trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+      if (tlgrmsg && tlgrmsg.message_id !== undefined) {
+        await database.insert("messages", { messageid: msg.id.id }, { tlgrmsg: tlgrmsg.message_id, trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+      } else {
+        await database.insert("messages", { messageid: msg.id.id }, { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+      }
+    } catch (error) {
+      console.log(error);
+      console.log("Error saving srcmsgid to MongoDB123");
     }
-    catch { console.log("Error saving srcmsgid to MongoDB"); }
 
     //msg.reply("הפצת ההודעה הסתיימה.");
     msg.react("✅");

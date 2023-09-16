@@ -93,7 +93,7 @@ async function ForwardTelegram(msg, isConfig, telquotemsg) {
         }
         console.log("Message forwarded to Telegram");
     }catch{
-         tlgrmsg = undefined;
+         tlgrmsg = "";
         await msg.react("⚠️");
         await msg.reply("⚠️שים לב, ההודעה לא הועברה לטלגרם.⚠️\nעל מנת להפסיק הודעה זו יש לכבות העברה לטלגרם באמצעות הפורטל\n\nאם הנך מנסה להעביר הודעות לטלגרם, שים לב שהגדרת את כל ההגדרות כשורה.\nבמידה והבעיה עדיין נמשכת, יש לפנות למפתח.");
         console.log("MEssage did not forwarded to Telegram");
