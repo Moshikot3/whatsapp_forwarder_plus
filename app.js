@@ -76,7 +76,7 @@ const client = new Client({
   authStrategy: new LocalAuth({ clientId: 'bot-wafp' }),
   puppeteer: {
     executablePath,
-    headless: false,
+    headless: true,
     args: [
       '--no-sandbox', // Add this option to fix sandbox-related issues in some environments
       '--disable-setuid-sandbox', // Add this option to fix sandbox-related issues in some environments
