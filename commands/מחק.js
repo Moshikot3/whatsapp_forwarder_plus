@@ -1,10 +1,15 @@
 const sleep = require('../helpers/sleep_helper.js');
 const database = require("../helpers/db_helper");
+const telegram = require("../helpers/telegram_helper");
 
 
 
 const execute = async (sourceGroup, targetGroups, client, msg) => {
-    let delmsgid = undefined
+    const isConfig = await database.read("config");
+    let delmsgid = undefined;
+    let delmsginfo = undefined;
+    let telquotemsg;
+
 
     if (msg.from == sourceGroup && msg.body == '!מחק') {
         await msg.react("🔄");
@@ -13,10 +18,11 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
             return;
         }
         delmsgid = msg._data.quotedStanzaID;
-        let delmsginfo = undefined
+
+        
         try {
             delmsginfo = await database.read("messages", { messageid: delmsgid })
-
+            
             msg.reply("אני על זה, נא להעזר בסבלנות");
 
         } catch {
@@ -28,6 +34,16 @@ const execute = async (sourceGroup, targetGroups, client, msg) => {
 
 
         //console.log(msg);
+        if(isConfig.OPT_TelegramBotToken && isConfig.OPT_TelegramChannelChatID && isConfig.OPT_forwardTelegram)
+        try{
+            telquotemsg = delmsginfo.tlgrmsg;
+            console.log(isConfig.OPT_TelegramChannelChatID + " " + telquotemsg);
+            await telegram.delMessage(isConfig.OPT_TelegramChannelChatID, telquotemsg);
+            
+        }catch{
+
+        };
+
         try{
         for (let i = 0; i < delmsginfo.trgroup.length; i++) {
             const trGroup = delmsginfo.trgroup[i];

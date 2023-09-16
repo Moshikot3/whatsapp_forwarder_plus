@@ -35,6 +35,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
     console.log(clientInfo.wid._serialized);
     let qutmsginfo = undefined;
     let quotemsg = undefined;
+    let telquotemsg;
 
 
 
@@ -44,7 +45,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
       try {
         qutmsginfo = await database.read("messages", { messageid: qutmsgid })
         quotemsg = await msg.getQuotedMessage();
-
+        telquotemsg = qutmsginfo.tlgrmsg;
         if (!qutmsginfo || qutmsginfo == "" || !qutmsginfo.trgroup) {
           msg.reply("ההודעה המצוטטת לא קיימת במאגר.");
           await msg.react("❌");
@@ -79,10 +80,24 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
     }
     let trgroupsmsgid = [];
     let trgroupsid = [];
+    let tlgrmsg ;
 
     if(isConfig.OPT_forwardTelegram){
-      telegram.ForwardTelegram(msg, isConfig);
-    }
+
+      try{
+
+        tlgrmsg  = await telegram.ForwardTelegram(msg, isConfig, telquotemsg);
+        console.log("tlgrmsg");
+      
+      }catch{
+
+        
+        tlgrmsg = "";
+        tlgrmsg.message_id = "";
+        console.log("Msg Didn't sent to telegram");
+      }
+
+    };
 
     for (const Group in targetGroups[0]) {
       
@@ -168,7 +183,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
 
     //saving messages targetgroups
     try {
-      await database.insert("messages", { messageid: msg.id.id }, { trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
+      await database.insert("messages", { messageid: msg.id.id }, { tlgrmsg: tlgrmsg.message_id, trgroup: trgroupsid, trgtmsgID: trgroupsmsgid });
     }
     catch { console.log("Error saving srcmsgid to MongoDB"); }
 
