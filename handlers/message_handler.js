@@ -162,7 +162,7 @@ if (msg.from == sourceGroup && msg.body != '!מחק') {
         //options.stickerAuthor = "חדשות הבזק";
         //options.stickerName = "חדשות הבזק";
         trmsg = await client.sendMessage(targetGroups[0][Group], attachmentData, options);
-        console.log(trmsg);
+        // console.log(trmsg);
       }
       console.log(`forward message to ${targetGroups[0][Group]}`);
 

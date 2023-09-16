@@ -135,7 +135,7 @@ async function SendWAFPStatus (botStatus)
             const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
             const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
             const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
-            console.log(OPT_TelegramAdminChatID);
+            // console.log(OPT_TelegramAdminChatID);
             if(OPT_TelegramAdminChatID){
                 process.env.NTBA_FIX_319 = 1;
                 process.env.NTBA_FIX_350 = 0;
