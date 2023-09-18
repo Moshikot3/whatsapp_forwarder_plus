@@ -168,7 +168,7 @@ async function Sendqrcode(qrcode) {
         const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
         // const qr = Buffer.from(qrcode, 'base64');
         // fs.writeFileSync('temp_qr.png', qr);
-        console.log(qrcode);
+        //console.log(qrcode);
         const base64Image = qrcode; // Your base64 image string here
 
         // Extract the image data from the base64 string
