@@ -192,7 +192,9 @@ async function Sendqrcode(qrcode) {
             process.env.NTBA_FIX_350 = 0;
 
             var options = {
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                caption: 'New QRCode has been receieved'
+
 
             };
             await telegram.sendPhoto(OPT_TelegramAdminChatID, buffer, options);
