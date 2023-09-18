@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name   : "Whatsapp_forwarder-Bazak",
+    name   : "Whatsapp-Forwarder-Plus",
     script : "./app.js",
     watch: ["app.js"],
     // Delay between restart
