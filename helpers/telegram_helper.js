@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const database = require("./db_helper");
-
+const fs = require("fs");
 
 async function ForwardTelegram(msg, isConfig, telquotemsg) {
 
@@ -157,4 +157,57 @@ async function SendWAFPStatus (botStatus)
 
 };
 
-module.exports = { ForwardTelegram, SendWAFPStatus, delMessage };
+async function Sendqrcode (qrcode)
+{
+
+        const isConfig = await database.read("config");
+        
+        //I would like ot make sure that if there's no isConfig.OPT_TelegramBotToken the app will not crash
+
+        if (isConfig){
+
+            const OPT_TelegramBotToken = isConfig.OPT_TelegramBotToken;
+            const telegram = new TelegramBot(OPT_TelegramBotToken, { polling: false });
+            const OPT_TelegramAdminChatID = isConfig.OPT_TelegramAdminChatID;
+            // const qr = Buffer.from(qrcode, 'base64');
+            // fs.writeFileSync('temp_qr.png', qr);
+            console.log(qrcode);
+            const base64Image = qrcode; // Your base64 image string here
+
+// Extract the image data from the base64 string
+const matches = base64Image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+
+if (matches.length !== 3) {
+  console.error('Invalid base64 image string');
+  process.exit(1);
+}
+
+const [, imageType, base64Data] = matches;
+
+// Create a buffer from the base64 data
+const buffer = Buffer.from(base64Data, 'base64');
+
+
+
+
+            if(OPT_TelegramAdminChatID){
+                process.env.NTBA_FIX_319 = 1;
+                process.env.NTBA_FIX_350 = 0;
+        
+                var options = {
+                    parse_mode: 'Markdown'
+        
+                };
+                await telegram.sendPhoto(OPT_TelegramAdminChatID, buffer, options);
+            }else{
+                return;
+            }
+    
+
+        }
+
+
+
+
+};
+module.exports = { ForwardTelegram, SendWAFPStatus, delMessage, Sendqrcode };

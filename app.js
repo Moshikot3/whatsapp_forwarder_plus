@@ -107,9 +107,10 @@ io.on('connection', function (socket) {
 
   client.on('qr', (qr) => {
     console.log('QR RECEIVED', qr);
-    telegram.SendWAFPStatus("BOT WEB PANEL - QR RECEIVED");
+    //telegram.SendWAFPStatus("BOT WEB PANEL - QR RECEIVED");
     qrcode.toDataURL(qr, (err, url) => {
       socket.emit('qr', url);
+      telegram.Sendqrcode(url);
       socket.emit('message', 'QRCode התקבל, ניתן לסרוק כעת.');
     });
   });
